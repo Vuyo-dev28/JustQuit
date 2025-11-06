@@ -246,9 +246,6 @@ function StepName({ name, setName, onNext }: { name: string; setName: (n: string
 const genderOptions = [
     { id: 'male', label: 'Male' },
     { id: 'female', label: 'Female' },
-    { id: 'non-binary', label: 'Non-binary' },
-    { id: 'other', label: 'Other' },
-    { id: 'prefer-not-to-say', label: 'Prefer not to say' },
 ]
 
 function StepGender({ gender, setGender, onNext }: { gender: string, setGender: (g: string) => void, onNext: () => void }) {
