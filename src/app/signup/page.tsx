@@ -1,9 +1,11 @@
 
+
 "use client";
 
-import { useState } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import SignatureCanvas from "react-signature-canvas";
 import {
   ArrowLeft,
   CigaretteOff,
@@ -20,7 +22,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 
 const categories: Category[] = [
@@ -51,8 +52,8 @@ const questions = [
     { id: 'category', title: 'Question #1', description: 'What are we tackling?' },
     { id: 'name', title: 'Question #2', description: 'What should we call you?' },
     { id: 'goal', title: 'Question #3', description: 'What is your initial goal?' },
-    { id: 'pledge', title: 'Question #4', description: 'Make a pledge to yourself.' },
-    { id: 'credentials', title: 'Question #5', description: 'Create your secure account.' },
+    { id: 'pledge', title: 'Sign your commitment', description: 'Promise yourself that you will never do it again.' },
+    { id: 'credentials', title: 'Create your account', description: 'Almost there! Secure your journey.' },
 ]
 
 export default function SignupPage() {
@@ -71,7 +72,7 @@ export default function SignupPage() {
       if (typeof window !== 'undefined') {
         localStorage.setItem("userName", name);
         localStorage.setItem("userGoal", goal.toString());
-        localStorage.setItem("userPledge", pledge);
+        // Pledge is now the signature, which we aren't saving yet.
       }
       router.push("/subscribe");
     }
@@ -93,6 +94,18 @@ export default function SignupPage() {
   
   const currentQuestion = questions[step - 1];
 
+  const getDynamicDescription = () => {
+    if (step === 5 && selectedCategory) {
+      const categoryTextMap = {
+        Porn: 'watch porn',
+        Alcohol: 'drink alcohol',
+        Smoking: 'smoke'
+      }
+      return `Finally, promise yourself that you will never ${categoryTextMap[selectedCategory]} again.`
+    }
+    return currentQuestion.description;
+  }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-transparent">
         <div className="w-full max-w-md space-y-8">
@@ -110,14 +123,18 @@ export default function SignupPage() {
                 <div className="w-full mx-8">
                     <Progress value={(step / totalSteps) * 100} className="h-2" />
                 </div>
-                <div className="w-9 h-9"/>
+                 {step === totalSteps ? <div className="w-9 h-9"/> : (
+                     <Button variant="link" onClick={handleNext} className="text-muted-foreground p-0 h-9 w-9 text-sm">
+                        Skip
+                    </Button>
+                )}
             </header>
 
             <main className="text-center">
                  <h1 className="text-3xl font-bold mb-2 font-headline tracking-tight">
                     {currentQuestion.title}
                  </h1>
-                 <p className="text-muted-foreground">{currentQuestion.description}</p>
+                 <p className="text-muted-foreground">{getDynamicDescription()}</p>
             </main>
 
             <div className="min-h-[300px]">
@@ -125,15 +142,10 @@ export default function SignupPage() {
                 {step === 2 && <Step2 onSelect={handleCategorySelect} />}
                 {step === 3 && <StepName name={name} setName={setName} onNext={handleNext} />}
                 {step === 4 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
-                {step === 5 && <StepPledge pledge={pledge} setPledge={setPledge} onNext={handleNext} />}
+                {step === 5 && <StepSignature onNext={handleNext} />}
                 {step === 6 && <StepCredentials onNext={handleNext} />}
             </div>
 
-             <footer className="text-center">
-                {step > 1 && step < totalSteps && (
-                    <Button variant="link" onClick={handleNext} className="text-muted-foreground">Skip</Button>
-                )}
-            </footer>
              <div className="text-center text-sm text-muted-foreground">
                 Already have an account?{" "}
                 <Link href="/login" className="underline text-primary/90 font-medium">
@@ -226,27 +238,41 @@ function StepGoal({ goal, setGoal, onNext }: { goal: number; setGoal: (g: number
     )
 }
 
+function StepSignature({ onNext }: { onNext: () => void }) {
+  const sigCanvas = useRef<SignatureCanvas | null>(null);
 
-function StepPledge({ pledge, setPledge, onNext }: { pledge: string; setPledge: (p: string) => void; onNext: () => void }) {
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        onNext();
-    }
-    return (
-        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
-            <Textarea 
-                placeholder="I commit to my well-being by..."
-                value={pledge}
-                onChange={(e) => setPledge(e.target.value)}
-                rows={4}
-                className="bg-secondary/50 rounded-2xl border-border focus:border-primary w-full max-w-xs text-center"
-            />
-            <Button type="submit" size="lg" className="w-full max-w-xs rounded-full">
-                Save Pledge
-            </Button>
-        </form>
-    )
+  const clear = () => {
+    sigCanvas.current?.clear();
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onNext();
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 animate-in fade-in-0 duration-500 flex flex-col items-center">
+      <div className="bg-card w-full max-w-sm h-48 rounded-lg border border-border">
+         <SignatureCanvas
+            ref={sigCanvas}
+            penColor='white'
+            canvasProps={{ className: 'w-full h-full' }}
+        />
+      </div>
+      <div className="w-full max-w-sm flex justify-between items-center">
+        <Button variant="link" onClick={clear} type="button" className="text-muted-foreground">
+            Clear
+        </Button>
+        <p className="text-muted-foreground text-sm">Draw on the open space above</p>
+      </div>
+
+      <Button type="submit" size="lg" className="w-full max-w-xs rounded-full !mt-8">
+        Finish
+      </Button>
+    </form>
+  );
 }
+
 
 function StepCredentials({ onNext }: { onNext: () => void }) {
     const handleSubmit = (e: React.FormEvent) => {
@@ -269,3 +295,4 @@ function StepCredentials({ onNext }: { onNext: () => void }) {
       </form>
   );
 }
+
