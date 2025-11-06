@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 
@@ -25,24 +26,44 @@ export default function JournalPage() {
   return (
     <div className="p-4 space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
       <header>
-        <h1 className="text-2xl font-bold font-headline">My Journal</h1>
+        <h1 className="text-2xl font-bold font-headline">Guided Journal</h1>
         <p className="text-muted-foreground">
-          A private space for your thoughts and reflections.
+          Reflect on your day with these helpful prompts.
         </p>
       </header>
 
       <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-100 fill-mode-both">
         <CardHeader>
-          <CardTitle>New Entry</CardTitle>
+          <CardTitle>Today's Entry</CardTitle>
           <CardDescription>
-            What's on your mind today?
+            Take a few moments to reflect on your day.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Textarea
-            placeholder="Today I felt..."
-            rows={8}
-          />
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="grateful-input">What is one thing you're grateful for today?</Label>
+            <Textarea
+              id="grateful-input"
+              placeholder="It can be something big or small..."
+              rows={3}
+            />
+          </div>
+           <div className="space-y-2">
+            <Label htmlFor="feeling-input">How are you feeling right now, and why?</Label>
+            <Textarea
+              id="feeling-input"
+              placeholder="Describe your emotions..."
+              rows={3}
+            />
+          </div>
+           <div className="space-y-2">
+            <Label htmlFor="victory-input">What was a small victory you had today?</Label>
+            <Textarea
+              id="victory-input"
+              placeholder="Did you resist a craving or accomplish a task?"
+              rows={3}
+            />
+          </div>
           <Button onClick={handleSaveEntry}>
             <Plus className="mr-2" />
             Save Entry
