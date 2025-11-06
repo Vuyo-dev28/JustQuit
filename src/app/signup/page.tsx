@@ -363,17 +363,17 @@ function StepChooseGoals({ chosenGoals, setChosenGoals, onNext }: { chosenGoals:
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
-            <div className="w-full max-w-xs space-y-3">
+            <div className="w-full max-w-md grid grid-cols-1 md:grid-cols-2 gap-3">
                 {goalOptions.map(option => (
-                    <Card key={option.id} className="bg-secondary/50 border-border has-[:checked]:border-primary transition-colors duration-200 rounded-full">
-                        <Label className="flex items-center p-4 gap-4 cursor-pointer">
+                    <Card key={option.id} className="bg-secondary/50 border-border has-[:checked]:border-primary transition-colors duration-200 rounded-2xl">
+                        <Label className="flex items-center p-3 gap-3 cursor-pointer">
                              <Checkbox 
                                 id={option.id} 
                                 checked={chosenGoals.includes(option.id)}
                                 onCheckedChange={() => handleGoalToggle(option.id)}
                             />
-                            <option.icon className="h-6 w-6 text-primary" />
-                            <h3 className="font-semibold text-lg text-foreground">{option.label}</h3>
+                            <option.icon className="h-5 w-5 text-primary" />
+                            <h3 className="font-semibold text-base text-foreground">{option.label}</h3>
                         </Label>
                     </Card>
                 ))}
