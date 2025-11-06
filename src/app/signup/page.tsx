@@ -10,6 +10,7 @@ import {
   ArrowLeft,
   CigaretteOff,
   EyeOff,
+  Radio,
   Wine,
 } from "lucide-react";
 
@@ -25,6 +26,7 @@ import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const categories: Category[] = [
   {
@@ -304,20 +306,31 @@ function StepTriggers({ triggers, setTriggers, onNext }: { triggers: string, set
     )
 }
 
+const motivationOptions = [
+    { id: 'health', label: 'To improve my physical health' },
+    { id: 'relationships', label: 'To improve my relationships' },
+    { id: 'clarity', label: 'For mental clarity and focus' },
+    { id: 'self-esteem', label: 'To boost my self-esteem' },
+    { id: 'other', label: 'Other' },
+]
+
 function StepMotivation({ motivation, setMotivation, onNext }: { motivation: string, setMotivation: (m: string) => void, onNext: () => void }) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onNext();
+        if (motivation) onNext();
     }
     return (
         <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
-             <Textarea
-                id="motivation"
-                placeholder="e.g., to be healthier, improve relationships..."
-                value={motivation}
-                onChange={(e) => setMotivation(e.target.value)}
-                className="bg-secondary/50 rounded-2xl border-border focus:border-primary max-w-xs min-h-[150px] text-base p-4"
-            />
+            <RadioGroup value={motivation} onValueChange={setMotivation} className="w-full max-w-xs space-y-3">
+                {motivationOptions.map(option => (
+                    <Card key={option.id} className="bg-secondary/50 border-border has-[:checked]:border-primary transition-colors duration-200 rounded-full">
+                        <Label className="flex items-center p-4 gap-4 cursor-pointer">
+                            <RadioGroupItem value={option.id} id={option.id} />
+                            <h3 className="font-semibold text-lg text-foreground">{option.label}</h3>
+                        </Label>
+                    </Card>
+                ))}
+            </RadioGroup>
             <Button type="submit" size="lg" className="w-full max-w-xs rounded-full">
                 Continue
             </Button>
