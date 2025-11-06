@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Check, Flame, Plus, Star, TrendingUp } from "lucide-react";
+import { Check, Flame, Plus, Star, Target, TrendingUp, NotebookText } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -125,6 +126,32 @@ export default function DashboardPage() {
             <div className="text-2xl font-bold">14 days</div>
             <p className="text-xs text-muted-foreground">
               Your personal best!
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="grid gap-4 md:grid-cols-2 grid-cols-1">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Your Goal</CardTitle>
+            <Target className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">90 days</div>
+            <p className="text-xs text-muted-foreground">
+              Keep your eyes on the prize.
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Your Pledge</CardTitle>
+            <NotebookText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+             <p className="text-sm text-muted-foreground truncate italic">
+              "I commit to my well-being and a better future."
             </p>
           </CardContent>
         </Card>
