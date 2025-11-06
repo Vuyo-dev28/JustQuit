@@ -56,13 +56,17 @@ export default function SignupPage() {
   const [selectedCategory, setSelectedCategory] =
     useState<AddictionCategory | null>(null);
   const [goal, setGoal] = useState(30);
+  const [name, setName] = useState("");
   const router = useRouter();
 
   const handleNext = () => {
     if (step < totalSteps) {
       setStep(step + 1);
     } else {
-      // Final step: redirect to dashboard
+      // Final step: save name and redirect to dashboard
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("userName", name);
+      }
       router.push("/dashboard");
     }
   };
@@ -104,7 +108,7 @@ export default function SignupPage() {
                 }}
               />
               <Step3 goal={goal} setGoal={setGoal} onNext={handleNext} />
-              <Step4 onNext={handleNext} />
+              <Step4 name={name} setName={setName} onNext={handleNext} />
             </div>
           </div>
         </Card>
@@ -212,7 +216,7 @@ function Step3({ goal, setGoal, onNext }: { goal: number; setGoal: (g: number) =
   );
 }
 
-function Step4({ onNext }: { onNext: () => void }) {
+function Step4({ name, setName, onNext }: { name: string; setName: (n: string) => void; onNext: () => void }) {
   return (
     <div className="w-1/4 p-6">
        <CardHeader className="text-center p-0 mb-6">
@@ -227,6 +231,10 @@ function Step4({ onNext }: { onNext: () => void }) {
         </CardDescription>
       </CardHeader>
       <CardContent className="p-0 space-y-4">
+        <div className="grid gap-2">
+            <Label htmlFor="name">Name</Label>
+            <Input id="name" type="text" placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
         <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
             <Input id="email" type="email" placeholder="you@example.com" />

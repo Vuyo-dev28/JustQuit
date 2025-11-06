@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Bar,
   BarChart,
@@ -65,6 +65,14 @@ export default function DashboardPage() {
   const { toast } = useToast();
   const [lastLogDate, setLastLogDate] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [name, setName] = useState('');
+
+  useEffect(() => {
+    const storedName = localStorage.getItem("userName");
+    if (storedName) {
+      setName(storedName);
+    }
+  }, []);
 
   const handleLogProgress = (success: boolean) => {
     const today = new Date().toDateString();
@@ -91,7 +99,7 @@ export default function DashboardPage() {
       {showConfetti && <Confetti onComplete={() => setShowConfetti(false)} />}
       <header className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold font-headline">Good morning,</h1>
+          <h1 className="text-2xl font-bold font-headline">Good morning, {name}</h1>
           <p className="text-muted-foreground">Ready to conquer the day?</p>
         </div>
         <AlertDialog>
