@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -10,6 +11,7 @@ import {
   Target,
   UserPlus,
   Wine,
+  ShieldAlert
 } from "lucide-react";
 
 import type { AddictionCategory, Category } from "@/lib/types";
@@ -49,7 +51,7 @@ const categories: Category[] = [
   },
 ];
 
-const totalSteps = 4;
+const totalSteps = 5;
 
 export default function SignupPage() {
   const [step, setStep] = useState(1);
@@ -99,7 +101,7 @@ export default function SignupPage() {
             className="transition-all duration-300"
             style={{ transform: `translateX(-${(step - 1) * 100}%)` }}
           >
-            <div className="flex w-[400%]" >
+            <div className="flex w-[500%]" >
               <Step1 onNext={handleNext} />
               <Step2
                 onSelect={(category) => {
@@ -107,8 +109,9 @@ export default function SignupPage() {
                   handleNext();
                 }}
               />
-              <Step3 goal={goal} setGoal={setGoal} onNext={handleNext} />
-              <Step4 name={name} setName={setName} onNext={handleNext} />
+              <Step3 selectedCategory={selectedCategory} onNext={handleNext} />
+              <Step4 goal={goal} setGoal={setGoal} onNext={handleNext} />
+              <Step5 name={name} setName={setName} onNext={handleNext} />
             </div>
           </div>
         </Card>
@@ -125,7 +128,7 @@ export default function SignupPage() {
 
 function Step1({ onNext }: { onNext: () => void }) {
   return (
-    <div className="w-1/4 p-6 flex flex-col justify-center text-center h-[450px]">
+    <div className="w-1/5 p-6 flex flex-col justify-center text-center h-[450px]">
       <div className="flex justify-center mb-6">
         <AppLogo />
       </div>
@@ -144,7 +147,7 @@ function Step1({ onNext }: { onNext: () => void }) {
 
 function Step2({ onSelect }: { onSelect: (category: AddictionCategory) => void }) {
   return (
-    <div className="w-1/4 p-6">
+    <div className="w-1/5 p-6 h-[450px]">
       <CardHeader className="text-center p-0 mb-6">
         <CardTitle className="text-2xl font-bold font-headline">
           What are we tackling?
@@ -182,9 +185,60 @@ function Step2({ onSelect }: { onSelect: (category: AddictionCategory) => void }
   );
 }
 
-function Step3({ goal, setGoal, onNext }: { goal: number; setGoal: (g: number) => void; onNext: () => void }) {
+const failureReasons = {
+    Porn: [
+        "Unstructured time and boredom",
+        "Stress and emotional triggers",
+        "Easy access to content online",
+        "Lack of accountability",
+    ],
+    Alcohol: [
+        "Social pressure and events",
+        "Withdrawal symptoms",
+        "Using alcohol to cope with stress",
+        "Not having a strong support system",
+    ],
+    Smoking: [
+        "Cravings and nicotine withdrawal",
+        "Habitual triggers (e.g., after meals)",
+        "Stress or social situations",
+        "Believing 'just one' won't hurt",
+    ],
+}
+
+function Step3({ selectedCategory, onNext }: { selectedCategory: AddictionCategory | null, onNext: () => void }) {
+    const reasons = selectedCategory ? failureReasons[selectedCategory] : [];
+    return (
+        <div className="w-1/5 p-6 h-[450px] flex flex-col">
+            <CardHeader className="text-center p-0 mb-6">
+                <div className="mx-auto bg-secondary text-secondary-foreground p-3 rounded-lg mb-4">
+                    <ShieldAlert className="h-8 w-8" />
+                </div>
+                <CardTitle className="text-2xl font-bold font-headline">
+                    Know The Enemy
+                </CardTitle>
+                <CardDescription>
+                    Here are common reasons people stumble when quitting {selectedCategory}. Awareness is the first step.
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0 space-y-3 text-sm text-muted-foreground flex-1">
+               {reasons.map((reason, index) => (
+                   <div key={index} className="flex items-start gap-2">
+                       <span className="text-primary/80 mt-1">&#8226;</span>
+                       <p>{reason}</p>
+                   </div>
+               ))}
+            </CardContent>
+            <Button onClick={onNext} className="w-full mt-4">
+              I Understand, Continue
+            </Button>
+        </div>
+    )
+}
+
+function Step4({ goal, setGoal, onNext }: { goal: number; setGoal: (g: number) => void; onNext: () => void }) {
   return (
-    <div className="w-1/4 p-6">
+    <div className="w-1/5 p-6 h-[450px]">
       <CardHeader className="text-center p-0 mb-6">
         <div className="mx-auto bg-secondary text-secondary-foreground p-3 rounded-lg mb-4">
             <Target className="h-8 w-8" />
@@ -216,9 +270,9 @@ function Step3({ goal, setGoal, onNext }: { goal: number; setGoal: (g: number) =
   );
 }
 
-function Step4({ name, setName, onNext }: { name: string; setName: (n: string) => void; onNext: () => void }) {
+function Step5({ name, setName, onNext }: { name: string; setName: (n: string) => void; onNext: () => void }) {
   return (
-    <div className="w-1/4 p-6">
+    <div className="w-1/5 p-6 h-[450px]">
        <CardHeader className="text-center p-0 mb-6">
         <div className="mx-auto bg-secondary text-secondary-foreground p-3 rounded-lg mb-4">
             <UserPlus className="h-8 w-8" />
@@ -250,3 +304,6 @@ function Step4({ name, setName, onNext }: { name: string; setName: (n: string) =
     </div>
   );
 }
+
+
+    
