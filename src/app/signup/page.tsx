@@ -12,6 +12,9 @@ import {
   EyeOff,
   Radio,
   Wine,
+  Heart,
+  Zap,
+  Smile
 } from "lucide-react";
 
 import type { AddictionCategory, Category } from "@/lib/types";
@@ -27,6 +30,7 @@ import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const categories: Category[] = [
   {
@@ -49,17 +53,19 @@ const categories: Category[] = [
   },
 ];
 
-const totalSteps = 10;
+const totalSteps = 12;
 
 const questions = [
     { id: 'welcome', title: "Let's Get Started", description: "Take the first step towards a healthier, happier you. Let's triumph over vice together." },
     { id: 'category', title: 'Question #1', description: 'What are we tackling?' },
     { id: 'name', title: 'Question #2', description: 'What should we call you?' },
-    { id: 'age', title: 'Question #3', description: 'How old are you?' },
-    { id: 'social', title: 'Question #4', description: 'Which social media platform do you use the most?'},
-    { id: 'triggers', title: 'Question #5', description: 'What are your relapse triggers?'},
-    { id: 'motivation', title: 'Question #6', description: 'Why do you want to be free?'},
-    { id: 'goal', title: 'Question #7', description: 'What is your initial goal?' },
+    { id: 'gender', title: 'Question #3', description: 'What is your gender?' },
+    { id: 'age', title: 'Question #4', description: 'How old are you?' },
+    { id: 'social', title: 'Question #5', description: 'Which social media platform do you use the most?'},
+    { id: 'goals', title: 'Question #6', description: 'What are your primary goals?'},
+    { id: 'triggers', title: 'Question #7', description: 'What are your relapse triggers?'},
+    { id: 'motivation', title: 'Question #8', description: 'Why do you want to be free?'},
+    { id: 'goal', title: 'Question #9', description: 'What is your initial goal?' },
     { id: 'pledge', title: 'Sign your commitment', description: 'Promise yourself that you will never do it again.' },
     { id: 'credentials', title: 'Create your account', description: 'Almost there! Secure your journey.' },
 ]
@@ -69,8 +75,10 @@ export default function SignupPage() {
   const [selectedCategory, setSelectedCategory] =
     useState<AddictionCategory | null>(null);
   const [name, setName] = useState("");
+  const [gender, setGender] = useState("");
   const [age, setAge] = useState("");
   const [socialPlatform, setSocialPlatform] = useState("");
+  const [chosenGoals, setChosenGoals] = useState<string[]>([]);
   const [triggers, setTriggers] = useState("");
   const [motivation, setMotivation] = useState("");
   const [goal, setGoal] = useState(90);
@@ -82,9 +90,11 @@ export default function SignupPage() {
     } else {
       if (typeof window !== 'undefined') {
         localStorage.setItem("userName", name);
+        localStorage.setItem("userGender", gender);
         localStorage.setItem("userGoal", goal.toString());
         localStorage.setItem("userAge", age);
         localStorage.setItem("userSocial", socialPlatform);
+        localStorage.setItem("userGoals", JSON.stringify(chosenGoals));
         localStorage.setItem("userTriggers", triggers);
         localStorage.setItem("userMotivation", motivation);
         if (selectedCategory) {
@@ -109,7 +119,7 @@ export default function SignupPage() {
   const currentQuestion = questions[step - 1];
 
   const getDynamicDescription = () => {
-    if (step === 9 && selectedCategory) {
+    if (step === 11 && selectedCategory) {
       const categoryTextMap = {
         Porn: 'watch porn',
         Alcohol: 'drink alcohol',
@@ -155,13 +165,15 @@ export default function SignupPage() {
                 {step === 1 && <Step1 onNext={handleNext} />}
                 {step === 2 && <Step2 onSelect={handleCategorySelect} />}
                 {step === 3 && <StepName name={name} setName={setName} onNext={handleNext} />}
-                {step === 4 && <StepAge age={age} setAge={setAge} onNext={handleNext} />}
-                {step === 5 && <StepSocial socialPlatform={socialPlatform} setSocialPlatform={setSocialPlatform} onNext={handleNext} />}
-                {step === 6 && <StepTriggers triggers={triggers} setTriggers={setTriggers} onNext={handleNext} />}
-                {step === 7 && <StepMotivation motivation={motivation} setMotivation={setMotivation} onNext={handleNext} />}
-                {step === 8 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
-                {step === 9 && <StepSignature onNext={handleNext} />}
-                {step === 10 && <StepCredentials onNext={handleNext} />}
+                {step === 4 && <StepGender gender={gender} setGender={setGender} onNext={handleNext} />}
+                {step === 5 && <StepAge age={age} setAge={setAge} onNext={handleNext} />}
+                {step === 6 && <StepSocial socialPlatform={socialPlatform} setSocialPlatform={setSocialPlatform} onNext={handleNext} />}
+                {step === 7 && <StepChooseGoals chosenGoals={chosenGoals} setChosenGoals={setChosenGoals} onNext={handleNext} />}
+                {step === 8 && <StepTriggers triggers={triggers} setTriggers={setTriggers} onNext={handleNext} />}
+                {step === 9 && <StepMotivation motivation={motivation} setMotivation={setMotivation} onNext={handleNext} />}
+                {step === 10 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
+                {step === 11 && <StepSignature onNext={handleNext} />}
+                {step === 12 && <StepCredentials onNext={handleNext} />}
             </div>
 
              <div className="text-center text-sm text-muted-foreground">
@@ -231,6 +243,39 @@ function StepName({ name, setName, onNext }: { name: string; setName: (n: string
     )
 }
 
+const genderOptions = [
+    { id: 'male', label: 'Male' },
+    { id: 'female', label: 'Female' },
+    { id: 'non-binary', label: 'Non-binary' },
+    { id: 'other', label: 'Other' },
+    { id: 'prefer-not-to-say', label: 'Prefer not to say' },
+]
+
+function StepGender({ gender, setGender, onNext }: { gender: string, setGender: (g: string) => void, onNext: () => void }) {
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (gender) onNext();
+    }
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+            <RadioGroup value={gender} onValueChange={setGender} className="w-full max-w-xs space-y-3">
+                {genderOptions.map(option => (
+                    <Card key={option.id} className="bg-secondary/50 border-border has-[:checked]:border-primary transition-colors duration-200 rounded-full">
+                        <Label className="flex items-center p-4 gap-4 cursor-pointer">
+                            <RadioGroupItem value={option.id} id={option.id} />
+                            <h3 className="font-semibold text-lg text-foreground">{option.label}</h3>
+                        </Label>
+                    </Card>
+                ))}
+            </RadioGroup>
+            <Button type="submit" size="lg" className="w-full max-w-xs rounded-full">
+                Continue
+            </Button>
+        </form>
+    )
+}
+
+
 function StepAge({ age, setAge, onNext }: { age: string; setAge: (a: string) => void; onNext: () => void }) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -278,6 +323,48 @@ function StepSocial({ socialPlatform, setSocialPlatform, onNext }: { socialPlatf
                     <SelectItem value="Other" className="text-lg">Other</SelectItem>
                 </SelectContent>
             </Select>
+            <Button type="submit" size="lg" className="w-full max-w-xs rounded-full">
+                Continue
+            </Button>
+        </form>
+    )
+}
+
+const goalOptions = [
+    { id: 'health', label: 'Improve Health', icon: Heart },
+    { id: 'productivity', label: 'Increase Productivity', icon: Zap },
+    { id: 'happiness', label: 'Boost Happiness', icon: Smile },
+]
+
+function StepChooseGoals({ chosenGoals, setChosenGoals, onNext }: { chosenGoals: string[], setChosenGoals: (goals: string[]) => void, onNext: () => void }) {
+    const handleGoalToggle = (goalId: string) => {
+        setChosenGoals(prev => 
+            prev.includes(goalId) ? prev.filter(g => g !== goalId) : [...prev, goalId]
+        );
+    }
+    
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (chosenGoals.length > 0) onNext();
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+            <div className="w-full max-w-xs space-y-3">
+                {goalOptions.map(option => (
+                    <Card key={option.id} className="bg-secondary/50 border-border has-[:checked]:border-primary transition-colors duration-200 rounded-full">
+                        <Label className="flex items-center p-4 gap-4 cursor-pointer">
+                             <Checkbox 
+                                id={option.id} 
+                                checked={chosenGoals.includes(option.id)}
+                                onCheckedChange={() => handleGoalToggle(option.id)}
+                            />
+                            <option.icon className="h-6 w-6 text-primary" />
+                            <h3 className="font-semibold text-lg text-foreground">{option.label}</h3>
+                        </Label>
+                    </Card>
+                ))}
+            </div>
             <Button type="submit" size="lg" className="w-full max-w-xs rounded-full">
                 Continue
             </Button>
@@ -422,5 +509,3 @@ function StepCredentials({ onNext }: { onNext: () => void }) {
       </form>
   );
 }
-
-    
