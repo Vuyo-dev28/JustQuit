@@ -87,7 +87,7 @@ export default function DashboardPage() {
   const hasLoggedToday = lastLogDate === new Date().toDateString();
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-4 space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
       {showConfetti && <Confetti onComplete={() => setShowConfetti(false)} />}
       <header className="flex justify-between items-center">
         <div>
@@ -115,7 +115,7 @@ export default function DashboardPage() {
       </header>
 
       <div className="grid gap-4 md:grid-cols-2 grid-cols-1">
-        <Card>
+        <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-100 fill-mode-both">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
             <Flame className="h-4 w-4 text-muted-foreground" />
@@ -155,7 +155,7 @@ export default function DashboardPage() {
             </Sheet>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-200 fill-mode-both">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Longest Streak</CardTitle>
             <Star className="h-4 w-4 text-muted-foreground" />
@@ -170,7 +170,7 @@ export default function DashboardPage() {
       </div>
       
       <div className="grid gap-4 md:grid-cols-2 grid-cols-1">
-        <Card>
+        <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-300 fill-mode-both">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Your Goal</CardTitle>
             <Target className="h-4 w-4 text-muted-foreground" />
@@ -182,7 +182,7 @@ export default function DashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-400 fill-mode-both">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Your Pledge</CardTitle>
             <NotebookText className="h-4 w-4 text-muted-foreground" />
@@ -195,7 +195,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <Card>
+      <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-500 fill-mode-both">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />

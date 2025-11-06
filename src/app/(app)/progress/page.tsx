@@ -10,14 +10,14 @@ import { Separator } from "@/components/ui/separator";
 
 export default function ProgressPage() {
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-4 space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
       <header>
         <h1 className="text-2xl font-bold font-headline">Your Progress</h1>
         <p className="text-muted-foreground">A detailed look at your journey.</p>
       </header>
       
       <div className="grid gap-4 md:grid-cols-2 grid-cols-1">
-        <Card>
+        <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-100 fill-mode-both">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Your Goal</CardTitle>
               <Target className="h-4 w-4 text-muted-foreground" />
@@ -26,7 +26,7 @@ export default function ProgressPage() {
               <div className="text-2xl font-bold">90 days</div>
             </CardContent>
         </Card>
-        <Card>
+        <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-200 fill-mode-both">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center justify-between">
               Your Pledge
@@ -41,7 +41,7 @@ export default function ProgressPage() {
         </Card>
       </div>
 
-      <Card>
+      <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-300 fill-mode-both">
         <CardHeader>
           <CardTitle>Progress History</CardTitle>
           <CardDescription>
@@ -53,7 +53,7 @@ export default function ProgressPage() {
         </CardContent>
       </Card>
 
-      <div className="space-y-4">
+      <div className="space-y-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-400 fill-mode-both">
         <h2 className="text-lg font-semibold">Milestones</h2>
         <Card>
           <CardContent className="p-4">

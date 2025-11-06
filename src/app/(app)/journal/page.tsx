@@ -23,7 +23,7 @@ export default function JournalPage() {
   };
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-4 space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
       <header>
         <h1 className="text-2xl font-bold font-headline">My Journal</h1>
         <p className="text-muted-foreground">
@@ -31,7 +31,7 @@ export default function JournalPage() {
         </p>
       </header>
 
-      <Card>
+      <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-100 fill-mode-both">
         <CardHeader>
           <CardTitle>New Entry</CardTitle>
           <CardDescription>
@@ -50,7 +50,7 @@ export default function JournalPage() {
         </CardContent>
       </Card>
       
-      <div className="space-y-4">
+      <div className="space-y-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-200 fill-mode-both">
         <h2 className="text-lg font-semibold">Past Entries</h2>
          <Card>
           <CardContent className="p-4 flex flex-col items-center justify-center text-center text-muted-foreground h-40">

@@ -65,13 +65,13 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-4 space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
       <header>
         <h1 className="text-2xl font-bold font-headline">Settings</h1>
         <p className="text-muted-foreground">Manage your account and goals.</p>
       </header>
 
-      <Card>
+      <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-100 fill-mode-both">
         <CardHeader>
           <CardTitle>Your Goal</CardTitle>
           <CardDescription>
@@ -99,7 +99,7 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-200 fill-mode-both">
         <CardHeader>
           <CardTitle>Personal Pledge</CardTitle>
           <CardDescription>
@@ -117,7 +117,7 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-300 fill-mode-both">
         <CardHeader>
           <CardTitle>Account</CardTitle>
           <CardDescription>

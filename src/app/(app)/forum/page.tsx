@@ -64,7 +64,7 @@ export default function ForumPage() {
   }
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="p-4 space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
       <header>
         <h1 className="text-2xl font-bold font-headline">Community Forum</h1>
         <p className="text-muted-foreground">
@@ -72,7 +72,7 @@ export default function ForumPage() {
         </p>
       </header>
 
-      <Card>
+      <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-100 fill-mode-both">
         <CardContent className="p-4">
           <div className="flex gap-2">
             <Input 
@@ -88,8 +88,8 @@ export default function ForumPage() {
       </Card>
       
       <div className="space-y-4">
-        {posts.map((post) => (
-          <Card key={post.id}>
+        {posts.map((post, index) => (
+          <Card key={post.id} className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 fill-mode-both" style={{animationDelay: `${200 + index * 100}ms`}}>
             <CardHeader className="p-4">
               <div className="flex items-center gap-3">
                 <Avatar>
