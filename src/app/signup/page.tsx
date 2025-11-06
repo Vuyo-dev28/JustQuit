@@ -1,8 +1,7 @@
 
-
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SignatureCanvas from "react-signature-canvas";
@@ -10,7 +9,6 @@ import {
   ArrowLeft,
   CigaretteOff,
   EyeOff,
-  Radio,
   Wine,
   Heart,
   Zap,
@@ -39,6 +37,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
+import { analyzeUserProblems, type AnalyzeUserProblemsOutput } from "@/ai/flows/analyze-user-problems";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const categories: Category[] = [
   {
@@ -61,7 +61,7 @@ const categories: Category[] = [
   },
 ];
 
-const totalSteps = 12;
+const totalSteps = 13;
 
 const questions = [
     { id: 'welcome', title: "Let's Get Started", description: "Take the first step towards a healthier, happier you. Let's triumph over vice together." },
@@ -74,6 +74,7 @@ const questions = [
     { id: 'triggers', title: 'Question #7', description: 'What are your relapse triggers?'},
     { id: 'motivation', title: 'Question #8', description: 'Why do you want to be free?'},
     { id: 'goal', title: 'Question #9', description: 'What is your initial goal?' },
+    { id: 'analysis', title: 'Your Personal Analysis', description: 'Based on your answers, here is a starting point for your journey.' },
     { id: 'pledge', title: 'Sign your commitment', description: 'Promise yourself that you will never do it again.' },
     { id: 'credentials', title: 'Create your account', description: 'Almost there! Secure your journey.' },
 ]
@@ -127,7 +128,7 @@ export default function SignupPage() {
   const currentQuestion = questions[step - 1];
 
   const getDynamicDescription = () => {
-    if (step === 11 && selectedCategory) {
+    if (step === 12 && selectedCategory) {
       const categoryTextMap = {
         Porn: 'watch porn',
         Alcohol: 'drink alcohol',
@@ -137,6 +138,15 @@ export default function SignupPage() {
     }
     return currentQuestion.description;
   }
+  
+  const signupData = {
+      category: selectedCategory,
+      age,
+      gender,
+      triggers,
+      motivation,
+      goals: chosenGoals
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-transparent">
@@ -155,7 +165,7 @@ export default function SignupPage() {
                 <div className="w-full mx-8">
                     <Progress value={(step / totalSteps) * 100} className="h-2" />
                 </div>
-                 {step === totalSteps ? <div className="w-9 h-9"/> : (
+                 {step === totalSteps || step === 11 ? <div className="w-9 h-9"/> : (
                      <Button variant="link" onClick={handleNext} className="text-muted-foreground p-0 h-9 w-9 text-sm">
                         Skip
                     </Button>
@@ -180,8 +190,9 @@ export default function SignupPage() {
                 {step === 8 && <StepTriggers triggers={triggers} setTriggers={setTriggers} onNext={handleNext} />}
                 {step === 9 && <StepMotivation motivation={motivation} setMotivation={setMotivation} onNext={handleNext} />}
                 {step === 10 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
-                {step === 11 && <StepSignature onNext={handleNext} />}
-                {step === 12 && <StepCredentials onNext={handleNext} />}
+                {step === 11 && <StepAiAnalysis data={signupData} onNext={handleNext} />}
+                {step === 12 && <StepSignature onNext={handleNext} />}
+                {step === 13 && <StepCredentials onNext={handleNext} />}
             </div>
 
              <div className="text-center text-sm text-muted-foreground">
@@ -463,6 +474,65 @@ function StepGoal({ goal, setGoal, onNext }: { goal: number; setGoal: (g: number
             </Button>
         </form>
     )
+}
+
+function StepAiAnalysis({ data, onNext }: { data: any, onNext: () => void }) {
+    const [analysis, setAnalysis] = useState<AnalyzeUserProblemsOutput | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const getAnalysis = async () => {
+            try {
+                setIsLoading(true);
+                const result = await analyzeUserProblems(data);
+                setAnalysis(result);
+            } catch (error) {
+                console.error("Error fetching AI analysis:", error);
+                // Fallback content in case of error
+                setAnalysis({
+                    summary: "We couldn't generate your analysis right now, but that's okay. The most important thing is that you're here and ready to start.",
+                    stats: "Many people face similar challenges, and taking this first step is a sign of great strength."
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        getAnalysis();
+    }, [data]);
+
+    return (
+        <div className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center text-left">
+            <Card className="w-full max-w-md bg-secondary/30">
+                <CardContent className="p-6 space-y-4">
+                    {isLoading ? (
+                        <>
+                            <Skeleton className="h-4 w-3/4" />
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-5/6" />
+                            <br/>
+                            <Skeleton className="h-4 w-full" />
+                             <Skeleton className="h-4 w-1/2" />
+                        </>
+                    ) : (
+                        <>
+                            <div>
+                                <h3 className="font-semibold mb-2 text-primary">Your Personal Snapshot</h3>
+                                <p className="text-foreground/90">{analysis?.summary}</p>
+                            </div>
+                            <div>
+                                <h3 className="font-semibold mb-2 text-primary">You're Not Alone</h3>
+                                <p className="text-foreground/90">{analysis?.stats}</p>
+                            </div>
+                        </>
+                    )}
+                </CardContent>
+            </Card>
+             <Button onClick={onNext} size="lg" className="w-full max-w-xs rounded-full">
+                Continue to Final Step
+            </Button>
+        </div>
+    );
 }
 
 function StepSignature({ onNext }: { onNext: () => void }) {
