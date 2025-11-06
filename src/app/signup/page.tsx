@@ -87,6 +87,9 @@ export default function SignupPage() {
         localStorage.setItem("userSocial", socialPlatform);
         localStorage.setItem("userTriggers", triggers);
         localStorage.setItem("userMotivation", motivation);
+        if (selectedCategory) {
+          localStorage.setItem("addictionCategory", selectedCategory);
+        }
       }
       router.push("/dashboard");
     }
@@ -100,9 +103,6 @@ export default function SignupPage() {
 
   const handleCategorySelect = (category: AddictionCategory) => {
     setSelectedCategory(category);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem("addictionCategory", category);
-    }
     handleNext();
   }
   
@@ -243,12 +243,12 @@ function StepAge({ age, setAge, onNext }: { age: string; setAge: (a: string) => 
                     <SelectValue placeholder="Select your age range" />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="<18">&lt; 18</SelectItem>
-                    <SelectItem value="18-24">18-24</SelectItem>
-                    <SelectItem value="25-34">25-34</SelectItem>
-                    <SelectItem value="35-44">35-44</SelectItem>
-                    <SelectItem value="45-54">45-54</SelectItem>
-                    <SelectItem value="55+">55+</SelectItem>
+                    <SelectItem value="<18" className="text-lg">&lt; 18</SelectItem>
+                    <SelectItem value="18-24" className="text-lg">18-24</SelectItem>
+                    <SelectItem value="25-34" className="text-lg">25-34</SelectItem>
+                    <SelectItem value="35-44" className="text-lg">35-44</SelectItem>
+                    <SelectItem value="45-54" className="text-lg">45-54</SelectItem>
+                    <SelectItem value="55+" className="text-lg">55+</SelectItem>
                 </SelectContent>
             </Select>
             <Button type="submit" size="lg" className="w-full max-w-xs rounded-full">
@@ -422,3 +422,5 @@ function StepCredentials({ onNext }: { onNext: () => void }) {
       </form>
   );
 }
+
+    
