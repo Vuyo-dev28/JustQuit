@@ -131,7 +131,7 @@ function Step1({ onNext }: { onNext: () => void }) {
       <p className="text-muted-foreground mb-8">
         Take the first step towards a healthier, happier you. Let's triumph over vice together.
       </p>
-      <Button onClick={onNext} className="w-full">
+      <Button onClick={onNext} className="w-full rounded-lg">
         Start Your Journey
       </Button>
     </div>
