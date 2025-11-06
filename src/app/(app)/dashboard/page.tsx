@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { useToast } from "@/hooks/use-toast";
+import Confetti from "@/components/shared/Confetti";
 
 
 const chartData = [
@@ -52,14 +53,16 @@ const chartConfig = {
 export default function DashboardPage() {
   const { toast } = useToast();
   const [lastLogDate, setLastLogDate] = useState<string | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const handleLogProgress = (success: boolean) => {
     const today = new Date().toDateString();
     setLastLogDate(today);
     if (success) {
+      setShowConfetti(true);
       toast({
-        title: "Progress Logged!",
-        description: "Great job on staying on track. Keep it up!",
+        title: "You did it! 🎉",
+        description: "Another day, another victory. Keep up the amazing work!",
       });
     } else {
       toast({
@@ -74,6 +77,7 @@ export default function DashboardPage() {
 
   return (
     <div className="p-4 space-y-6">
+      {showConfetti && <Confetti onComplete={() => setShowConfetti(false)} />}
       <header className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold font-headline">Good morning,</h1>
