@@ -16,14 +16,12 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
+import { Slider } from "@/components/ui/slider";
 
 const categories: Category[] = [
   {
@@ -46,13 +44,15 @@ const categories: Category[] = [
   },
 ];
 
-const totalSteps = 4;
+const totalSteps = 6;
 
 const questions = [
     { id: 'welcome', title: "Let's Get Started", description: "Take the first step towards a healthier, happier you. Let's triumph over vice together." },
     { id: 'category', title: 'Question #1', description: 'What are we tackling?' },
     { id: 'name', title: 'Question #2', description: 'What should we call you?' },
-    { id: 'credentials', title: 'Question #3', description: 'Create your secure account.' },
+    { id: 'goal', title: 'Question #3', description: 'What is your initial goal?' },
+    { id: 'pledge', title: 'Question #4', description: 'Make a pledge to yourself.' },
+    { id: 'credentials', title: 'Question #5', description: 'Create your secure account.' },
 ]
 
 export default function SignupPage() {
@@ -60,6 +60,8 @@ export default function SignupPage() {
   const [selectedCategory, setSelectedCategory] =
     useState<AddictionCategory | null>(null);
   const [name, setName] = useState("");
+  const [goal, setGoal] = useState(90);
+  const [pledge, setPledge] = useState("");
   const router = useRouter();
 
   const handleNext = () => {
@@ -68,6 +70,8 @@ export default function SignupPage() {
     } else {
       if (typeof window !== 'undefined') {
         localStorage.setItem("userName", name);
+        localStorage.setItem("userGoal", goal.toString());
+        localStorage.setItem("userPledge", pledge);
       }
       router.push("/subscribe");
     }
@@ -120,11 +124,13 @@ export default function SignupPage() {
                 {step === 1 && <Step1 onNext={handleNext} />}
                 {step === 2 && <Step2 onSelect={handleCategorySelect} />}
                 {step === 3 && <StepName name={name} setName={setName} onNext={handleNext} />}
-                {step === 4 && <StepCredentials onNext={handleNext} />}
+                {step === 4 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
+                {step === 5 && <StepPledge pledge={pledge} setPledge={setPledge} onNext={handleNext} />}
+                {step === 6 && <StepCredentials onNext={handleNext} />}
             </div>
 
              <footer className="text-center">
-                {step > 1 && (
+                {step > 1 && step < totalSteps && (
                     <Button variant="link" onClick={handleNext} className="text-muted-foreground">Skip</Button>
                 )}
             </footer>
@@ -178,17 +184,65 @@ function StepName({ name, setName, onNext }: { name: string; setName: (n: string
         onNext();
     }
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500">
+        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
              <Input 
                 id="name" 
                 type="text" 
                 placeholder="Enter your name..." 
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
-                className="h-14 text-center text-lg bg-secondary/50 rounded-full border-border focus:border-primary"
+                className="h-14 text-center text-lg bg-secondary/50 rounded-full border-border focus:border-primary max-w-xs"
             />
             <Button type="submit" size="lg" className="w-full max-w-xs rounded-full">
                 Continue
+            </Button>
+        </form>
+    )
+}
+
+function StepGoal({ goal, setGoal, onNext }: { goal: number; setGoal: (g: number) => void; onNext: () => void }) {
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onNext();
+    }
+    return (
+        <form onSubmit={handleSubmit} className="space-y-8 animate-in fade-in-0 duration-500 flex flex-col items-center">
+            <div className="text-center">
+                <p className="text-6xl font-bold font-headline">{goal}</p>
+                <p className="text-muted-foreground">days</p>
+            </div>
+            <Slider
+                value={[goal]}
+                max={365}
+                min={1}
+                step={1}
+                onValueChange={(value) => setGoal(value[0])}
+                className="w-full max-w-xs"
+            />
+            <Button type="submit" size="lg" className="w-full max-w-xs rounded-full">
+                Set Goal
+            </Button>
+        </form>
+    )
+}
+
+
+function StepPledge({ pledge, setPledge, onNext }: { pledge: string; setPledge: (p: string) => void; onNext: () => void }) {
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onNext();
+    }
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+            <Textarea 
+                placeholder="I commit to my well-being by..."
+                value={pledge}
+                onChange={(e) => setPledge(e.target.value)}
+                rows={4}
+                className="bg-secondary/50 rounded-2xl border-border focus:border-primary w-full max-w-xs text-center"
+            />
+            <Button type="submit" size="lg" className="w-full max-w-xs rounded-full">
+                Save Pledge
             </Button>
         </form>
     )
@@ -200,12 +254,12 @@ function StepCredentials({ onNext }: { onNext: () => void }) {
         onNext();
     }
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 animate-in fade-in-0 duration-500">
-        <div className="grid gap-2 text-left">
+    <form onSubmit={handleSubmit} className="space-y-4 animate-in fade-in-0 duration-500 flex flex-col items-center">
+        <div className="grid gap-2 text-left w-full max-w-xs">
             <Label htmlFor="email">Email</Label>
             <Input id="email" type="email" placeholder="you@example.com" className="h-12 bg-secondary/50 rounded-lg border-border focus:border-primary"/>
         </div>
-        <div className="grid gap-2 text-left">
+        <div className="grid gap-2 text-left w-full max-w-xs">
             <Label htmlFor="password">Password</Label>
             <Input id="password" type="password" placeholder="••••••••" className="h-12 bg-secondary/50 rounded-lg border-border focus:border-primary" />
         </div>
