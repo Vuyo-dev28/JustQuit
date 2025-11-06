@@ -32,7 +32,10 @@ export default function BottomNav() {
               pathname.startsWith("/dashboard") ? "text-primary scale-110" : ""
             )}
           >
-            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10">
+            <div className={cn(
+              "flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
+               pathname.startsWith("/dashboard") ? "scale-110" : "scale-100"
+            )}>
               <Flame className="h-8 w-8" />
             </div>
           </Link>
