@@ -10,7 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Check, Flame, Plus, Star, Target, TrendingUp, NotebookText, ShieldAlert, AlertTriangle } from "lucide-react";
+import { Check, Flame, Plus, Star, Target, TrendingUp, NotebookText, ShieldAlert, AlertTriangle, TrendingDown } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -71,6 +71,7 @@ export default function DashboardPage() {
   const [name, setName] = useState('');
   const [reasons, setReasons] = useState<string[]>([]);
   const [category, setCategory] = useState<AddictionCategory | null>(null);
+  const [slipUpCount, setSlipUpCount] = useState(0);
 
   useEffect(() => {
     const storedName = localStorage.getItem("userName");
@@ -81,6 +82,10 @@ export default function DashboardPage() {
     if (storedCategory && failureReasons[storedCategory]) {
       setCategory(storedCategory);
       setReasons(failureReasons[storedCategory]);
+    }
+    const storedSlipUps = localStorage.getItem("slipUpCount");
+    if (storedSlipUps) {
+      setSlipUpCount(parseInt(storedSlipUps, 10));
     }
   }, []);
 
@@ -94,6 +99,9 @@ export default function DashboardPage() {
         description: "Another day, another victory. Keep up the amazing work!",
       });
     } else {
+      const newSlipUpCount = slipUpCount + 1;
+      setSlipUpCount(newSlipUpCount);
+      localStorage.setItem("slipUpCount", newSlipUpCount.toString());
       toast({
         title: "Log Recorded",
         description: "Tomorrow is a new day to get back on track.",
@@ -187,7 +195,7 @@ export default function DashboardPage() {
         </Card>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 grid-cols-1">
+      <div className="grid gap-4 md:grid-cols-3 grid-cols-1">
         <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-300 fill-mode-both">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Your Goal</CardTitle>
@@ -200,7 +208,19 @@ export default function DashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-400 fill-mode-both">
+         <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-400 fill-mode-both">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Slip-ups</CardTitle>
+            <TrendingDown className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{slipUpCount}</div>
+            <p className="text-xs text-muted-foreground">
+                Learning opportunities.
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-500 fill-mode-both">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Your Pledge</CardTitle>
             <NotebookText className="h-4 w-4 text-muted-foreground" />
@@ -213,7 +233,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-500 fill-mode-both">
+      <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-600 fill-mode-both">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
@@ -257,7 +277,7 @@ export default function DashboardPage() {
       </Card>
 
       {reasons.length > 0 && (
-        <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-600 fill-mode-both">
+        <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-700 fill-mode-both">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5" />
@@ -279,4 +299,5 @@ export default function DashboardPage() {
       )}
     </div>
   );
-}
+
+    
