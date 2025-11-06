@@ -270,12 +270,12 @@ function StepSocial({ socialPlatform, setSocialPlatform, onNext }: { socialPlatf
                     <SelectValue placeholder="Select a platform" />
                 </SelectTrigger>
                 <SelectContent>
-                    <SelectItem value="Facebook">Facebook</SelectItem>
-                    <SelectItem value="Instagram">Instagram</SelectItem>
-                    <SelectItem value="TikTok">TikTok</SelectItem>
-                    <SelectItem value="Twitter">Twitter/X</SelectItem>
-                    <SelectItem value="Reddit">Reddit</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
+                    <SelectItem value="Facebook" className="text-lg">Facebook</SelectItem>
+                    <SelectItem value="Instagram" className="text-lg">Instagram</SelectItem>
+                    <SelectItem value="TikTok" className="text-lg">TikTok</SelectItem>
+                    <SelectItem value="Twitter" className="text-lg">Twitter/X</SelectItem>
+                    <SelectItem value="Reddit" className="text-lg">Reddit</SelectItem>
+                    <SelectItem value="Other" className="text-lg">Other</SelectItem>
                 </SelectContent>
             </Select>
             <Button type="submit" size="lg" className="w-full max-w-xs rounded-full">
