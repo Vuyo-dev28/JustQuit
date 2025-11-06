@@ -121,7 +121,7 @@ export default function SignupPage() {
 
 function Step1({ onNext }: { onNext: () => void }) {
   return (
-    <div className="w-1/4 p-6 text-center">
+    <div className="w-1/4 p-6 flex flex-col justify-center text-center h-[450px]">
       <div className="flex justify-center mb-6">
         <AppLogo />
       </div>
