@@ -14,7 +14,15 @@ import {
   Wine,
   Heart,
   Zap,
-  Smile
+  Smile,
+  DollarSign,
+  Users,
+  Leaf,
+  BrainCircuit,
+  Paintbrush,
+  BedDouble,
+  Sparkles,
+  Activity,
 } from "lucide-react";
 
 import type { AddictionCategory, Category } from "@/lib/types";
@@ -331,6 +339,14 @@ const goalOptions = [
     { id: 'health', label: 'Improve Health', icon: Heart },
     { id: 'productivity', label: 'Increase Productivity', icon: Zap },
     { id: 'happiness', label: 'Boost Happiness', icon: Smile },
+    { id: 'money', label: 'Save Money', icon: DollarSign },
+    { id: 'relationships', label: 'Improve Relationships', icon: Users },
+    { id: 'stress', label: 'Reduce Stress', icon: Leaf },
+    { id: 'control', label: 'Gain Self-Control', icon: BrainCircuit },
+    { id: 'hobbies', label: 'Find New Hobbies', icon: Paintbrush },
+    { id: 'sleep', label: 'Improve Sleep', icon: BedDouble },
+    { id: 'confidence', label: 'Boost Confidence', icon: Sparkles },
+    { id: 'longevity', label: 'Live Longer', icon: Activity },
 ]
 
 function StepChooseGoals({ chosenGoals, setChosenGoals, onNext }: { chosenGoals: string[], setChosenGoals: (goals: string[]) => void, onNext: () => void }) {
