@@ -7,7 +7,7 @@ export function AppLogo() {
         <Flame className="text-primary-foreground" />
       </div>
       <h1 className="text-xl font-bold text-foreground font-headline">
-        Triumph Over Vice
+        Just Quit
       </h1>
     </div>
   );
