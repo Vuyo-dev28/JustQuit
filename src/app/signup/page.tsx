@@ -29,6 +29,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
+import { failureReasons } from "@/lib/data";
 
 const categories: Category[] = [
   {
@@ -79,6 +80,14 @@ export default function SignupPage() {
     }
   };
 
+  const handleCategorySelect = (category: AddictionCategory) => {
+    setSelectedCategory(category);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("addictionCategory", category);
+    }
+    handleNext();
+  }
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
       <div className="w-full max-w-md">
@@ -104,10 +113,7 @@ export default function SignupPage() {
             <div className="flex w-[500%]" >
               <Step1 onNext={handleNext} />
               <Step2
-                onSelect={(category) => {
-                  setSelectedCategory(category);
-                  handleNext();
-                }}
+                onSelect={handleCategorySelect}
               />
               <Step3 selectedCategory={selectedCategory} onNext={handleNext} />
               <Step4 goal={goal} setGoal={setGoal} onNext={handleNext} />
@@ -183,27 +189,6 @@ function Step2({ onSelect }: { onSelect: (category: AddictionCategory) => void }
       </CardContent>
     </div>
   );
-}
-
-const failureReasons = {
-    Porn: [
-        "Unstructured time and boredom",
-        "Stress and emotional triggers",
-        "Easy access to content online",
-        "Lack of accountability",
-    ],
-    Alcohol: [
-        "Social pressure and events",
-        "Withdrawal symptoms",
-        "Using alcohol to cope with stress",
-        "Not having a strong support system",
-    ],
-    Smoking: [
-        "Cravings and nicotine withdrawal",
-        "Habitual triggers (e.g., after meals)",
-        "Stress or social situations",
-        "Believing 'just one' won't hurt",
-    ],
 }
 
 function Step3({ selectedCategory, onNext }: { selectedCategory: AddictionCategory | null, onNext: () => void }) {
@@ -304,6 +289,3 @@ function Step5({ name, setName, onNext }: { name: string; setName: (n: string) =
     </div>
   );
 }
-
-
-    

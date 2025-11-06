@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -9,7 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Check, Flame, Plus, Star, Target, TrendingUp, NotebookText, ShieldAlert } from "lucide-react";
+import { Check, Flame, Plus, Star, Target, TrendingUp, NotebookText, ShieldAlert, AlertTriangle } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -42,6 +43,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import type { AddictionCategory } from "@/lib/types";
+import { failureReasons } from "@/lib/data";
 
 
 const chartData = [
@@ -66,11 +69,18 @@ export default function DashboardPage() {
   const [lastLogDate, setLastLogDate] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [name, setName] = useState('');
+  const [reasons, setReasons] = useState<string[]>([]);
+  const [category, setCategory] = useState<AddictionCategory | null>(null);
 
   useEffect(() => {
     const storedName = localStorage.getItem("userName");
     if (storedName) {
       setName(storedName);
+    }
+    const storedCategory = localStorage.getItem("addictionCategory") as AddictionCategory | null;
+    if (storedCategory && failureReasons[storedCategory]) {
+      setCategory(storedCategory);
+      setReasons(failureReasons[storedCategory]);
     }
   }, []);
 
@@ -213,6 +223,20 @@ export default function DashboardPage() {
         <CardContent>
           <ChartContainer config={chartConfig} className="h-48 w-full">
             <BarChart accessibilityLayer data={chartData}>
+              <defs>
+                <linearGradient id="fillDays" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset="5%"
+                    stopColor="var(--color-days)"
+                    stopOpacity={0.8}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="var(--color-days)"
+                    stopOpacity={0.1}
+                  />
+                </linearGradient>
+              </defs>
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="day"
@@ -226,11 +250,33 @@ export default function DashboardPage() {
                 cursor={false}
                 content={<ChartTooltipContent indicator="dot" />}
               />
-              <Bar dataKey="days" fill="var(--color-days)" radius={8} />
+              <Bar dataKey="days" fill="url(#fillDays)" radius={8} />
             </BarChart>
           </ChartContainer>
         </CardContent>
       </Card>
+
+      {reasons.length > 0 && (
+        <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-600 fill-mode-both">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5" />
+                Common Challenges
+            </CardTitle>
+            <CardDescription>
+                Forewarned is forearmed. Here are common hurdles when quitting {category}.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm text-muted-foreground">
+              {reasons.map((reason, index) => (
+                <div key={index} className="flex items-start gap-2">
+                    <span className="text-primary/80 mt-1">&#8226;</span>
+                    <p>{reason}</p>
+                </div>
+              ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
