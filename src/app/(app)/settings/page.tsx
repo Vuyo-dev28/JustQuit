@@ -11,10 +11,23 @@ import {
 } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function SettingsPage() {
   const [goal, setGoal] = useState(90);
   const [newGoal, setNewGoal] = useState(goal);
+  const [pledge, setPledge] = useState("");
   const { toast } = useToast();
 
   const handleSaveGoal = () => {
@@ -22,6 +35,21 @@ export default function SettingsPage() {
     toast({
       title: "Goal Updated!",
       description: `Your new goal is to reach ${newGoal} days.`,
+    });
+  };
+
+  const handleSavePledge = () => {
+    toast({
+      title: "Pledge Saved!",
+      description: "Your personal commitment has been recorded.",
+    });
+  };
+
+  const handleResetProgress = () => {
+    toast({
+      variant: "destructive",
+      title: "Progress Reset",
+      description: "Your streak and progress have been cleared. It's a fresh start!",
     });
   };
 
@@ -62,10 +90,49 @@ export default function SettingsPage() {
       
       <Card>
         <CardHeader>
-          <CardTitle>Account</CardTitle>
+          <CardTitle>Personal Pledge</CardTitle>
+          <CardDescription>
+            Write a commitment to yourself. This is your personal mission statement to keep you focused.
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Button variant="destructive">Log Out</Button>
+        <CardContent className="space-y-4">
+          <Textarea 
+            placeholder="I commit to..."
+            value={pledge}
+            onChange={(e) => setPledge(e.target.value)} 
+          />
+          <Button onClick={handleSavePledge}>Save Pledge</Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Account</CardTitle>
+          <CardDescription>
+            Manage your account settings and data.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Button variant="outline">Log Out</Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">Reset All Progress</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete all your progress data, including your streaks and logs.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleResetProgress}>
+                  Yes, reset my progress
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </CardContent>
       </Card>
     </div>
