@@ -9,8 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 
 export default function SettingsPage() {
@@ -41,15 +40,18 @@ export default function SettingsPage() {
             ambitions.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="goal">Goal (in days)</Label>
-            <Input
-              id="goal"
-              type="number"
-              value={newGoal}
-              onChange={(e) => setNewGoal(Number(e.target.value))}
-              placeholder="e.g., 90"
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <div className="text-center">
+              <p className="text-5xl font-bold font-headline">{newGoal}</p>
+              <p className="text-muted-foreground">days</p>
+            </div>
+            <Slider
+              value={[newGoal]}
+              max={365}
+              min={1}
+              step={1}
+              onValueChange={(value) => setNewGoal(value[0])}
             />
           </div>
           <Button onClick={handleSaveGoal} disabled={goal === newGoal}>
