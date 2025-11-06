@@ -1,0 +1,163 @@
+"use client";
+
+import React, { useState } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { Check, Flame, Plus, Star, TrendingUp } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { useToast } from "@/hooks/use-toast";
+
+
+const chartData = [
+  { day: "Mon", days: 1 },
+  { day: "Tue", days: 2 },
+  { day: "Wed", days: 3 },
+  { day: "Thu", days: 2 },
+  { day: "Fri", days: 3 },
+  { day: "Sat", days: 4 },
+  { day: "Sun", days: 5 },
+];
+
+const chartConfig = {
+  days: {
+    label: "Streak",
+    color: "hsl(var(--primary))",
+  },
+};
+
+export default function DashboardPage() {
+  const { toast } = useToast();
+  const [lastLogDate, setLastLogDate] = useState<string | null>(null);
+
+  const handleLogProgress = (success: boolean) => {
+    const today = new Date().toDateString();
+    setLastLogDate(today);
+    if (success) {
+      toast({
+        title: "Progress Logged!",
+        description: "Great job on staying on track. Keep it up!",
+      });
+    } else {
+      toast({
+        title: "Log Recorded",
+        description: "Tomorrow is a new day to get back on track.",
+        variant: "default",
+      });
+    }
+  };
+  
+  const hasLoggedToday = lastLogDate === new Date().toDateString();
+
+  return (
+    <div className="p-4 space-y-6">
+      <header className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold font-headline">Good morning,</h1>
+          <p className="text-muted-foreground">Ready to conquer the day?</p>
+        </div>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button size="icon" disabled={hasLoggedToday}>
+              {hasLoggedToday ? <Check /> : <Plus />}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Log Your Progress</AlertDialogTitle>
+              <AlertDialogDescription>
+                Did you stay on track with your goal today? Be honest, every step counts.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => handleLogProgress(true)}>
+                Yes, I did!
+              </AlertDialogAction>
+              <Button variant="destructive" onClick={() => handleLogProgress(false)}>No, I slipped up</Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </header>
+
+      <div className="grid gap-4 md:grid-cols-2 grid-cols-1">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
+            <Flame className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">5 days</div>
+            <p className="text-xs text-muted-foreground">
+              You're doing great!
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Longest Streak</CardTitle>
+            <Star className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">14 days</div>
+            <p className="text-xs text-muted-foreground">
+              Your personal best!
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Weekly Streak
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ChartContainer config={chartConfig} className="h-48 w-full">
+            <BarChart accessibilityLayer data={chartData}>
+              <CartesianGrid vertical={false} />
+              <XAxis
+                dataKey="day"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+                tickFormatter={(value) => value.slice(0, 3)}
+              />
+              <YAxis hide={true} />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent indicator="dot" />}
+              />
+              <Bar dataKey="days" fill="var(--color-days)" radius={8} />
+            </BarChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
