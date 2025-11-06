@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookHeart, Flame, MessageSquare, Settings, TrendingUp } from "lucide-react";
+import { BookHeart, Flame, MessageSquare, Settings, TrendingUp, Gem } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/progress", label: "Progress", icon: TrendingUp },
   { href: "/journal", label: "Journal", icon: BookHeart },
+  { href: "/subscribe", label: "Premium", icon: Gem },
   { href: "/forum", label: "Forum", icon: MessageSquare },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
@@ -17,7 +18,8 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   const leftNavItems = navItems.slice(0, 2);
-  const rightNavItems = navItems.slice(2);
+  const rightNavItems = navItems.slice(3);
+  const premiumItem = navItems[2];
 
   return (
     <div className="fixed bottom-0 left-0 right-0 h-24 bg-transparent z-50">
@@ -64,8 +66,20 @@ export default function BottomNav() {
               })}
             </div>
 
-            {/* Spacer for the center button */}
-            <div className="w-1/5" />
+            {/* Premium Button - moved to be between the gaps */}
+            <div className="w-1/5 flex justify-center">
+                 <Link
+                    key={premiumItem.href}
+                    href={premiumItem.href}
+                    className={cn(
+                      "flex flex-col items-center justify-center text-muted-foreground transition-colors duration-200",
+                      pathname.startsWith(premiumItem.href) && "text-primary"
+                    )}
+                  >
+                    <premiumItem.icon className="h-6 w-6 mb-1" />
+                    <span className="text-xs font-medium">{premiumItem.label}</span>
+                  </Link>
+            </div>
 
             {/* Right side */}
             <div className="flex justify-around items-center w-2/5">
