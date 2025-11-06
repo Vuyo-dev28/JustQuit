@@ -39,6 +39,14 @@ export default function SettingsPage() {
   };
 
   const handleSavePledge = () => {
+    if (!pledge.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Pledge is empty",
+        description: "Please write a pledge before saving.",
+      });
+      return;
+    }
     toast({
       title: "Pledge Saved!",
       description: "Your personal commitment has been recorded.",
@@ -51,6 +59,9 @@ export default function SettingsPage() {
       title: "Progress Reset",
       description: "Your streak and progress have been cleared. It's a fresh start!",
     });
+    setGoal(90);
+    setNewGoal(90);
+    setPledge("");
   };
 
   return (
@@ -97,9 +108,10 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <Textarea 
-            placeholder="I commit to..."
+            placeholder="I commit to my well-being by..."
             value={pledge}
-            onChange={(e) => setPledge(e.target.value)} 
+            onChange={(e) => setPledge(e.target.value)}
+            rows={4}
           />
           <Button onClick={handleSavePledge}>Save Pledge</Button>
         </CardContent>
