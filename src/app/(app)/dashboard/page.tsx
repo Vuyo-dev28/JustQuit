@@ -80,28 +80,6 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold font-headline">Good morning,</h1>
           <p className="text-muted-foreground">Ready to conquer the day?</p>
         </div>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button size="icon" disabled={hasLoggedToday}>
-              {hasLoggedToday ? <Check /> : <Plus />}
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Log Your Progress</AlertDialogTitle>
-              <AlertDialogDescription>
-                Did you stay on track with your goal today? Be honest, every step counts.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={() => handleLogProgress(true)}>
-                Yes, I did!
-              </AlertDialogAction>
-              <Button variant="destructive" onClick={() => handleLogProgress(false)}>No, I slipped up</Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </header>
 
       <div className="grid gap-4 md:grid-cols-2 grid-cols-1">
@@ -110,11 +88,34 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
             <Flame className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <div className="text-2xl font-bold">5 days</div>
             <p className="text-xs text-muted-foreground">
               You're doing great!
             </p>
+             <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button size="sm" className="w-full" disabled={hasLoggedToday}>
+                    {hasLoggedToday ? <Check className="mr-2"/> : <Plus className="mr-2" />}
+                    {hasLoggedToday ? 'Logged for Today' : 'Log Today\'s Progress'}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Log Your Progress</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Did you stay on track with your goal today? Be honest, every step counts.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogAction onClick={() => handleLogProgress(true)}>
+                      Yes, I did!
+                    </AlertDialogAction>
+                    <Button variant="destructive" onClick={() => handleLogProgress(false)}>No, I slipped up</Button>
+                     <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
           </CardContent>
         </Card>
         <Card>
