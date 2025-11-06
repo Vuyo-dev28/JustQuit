@@ -23,6 +23,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const categories: Category[] = [
   {
@@ -45,13 +47,17 @@ const categories: Category[] = [
   },
 ];
 
-const totalSteps = 6;
+const totalSteps = 10;
 
 const questions = [
     { id: 'welcome', title: "Let's Get Started", description: "Take the first step towards a healthier, happier you. Let's triumph over vice together." },
     { id: 'category', title: 'Question #1', description: 'What are we tackling?' },
     { id: 'name', title: 'Question #2', description: 'What should we call you?' },
-    { id: 'goal', title: 'Question #3', description: 'What is your initial goal?' },
+    { id: 'age', title: 'Question #3', description: 'How old are you?' },
+    { id: 'social', title: 'Question #4', description: 'Which social media platform do you use the most?'},
+    { id: 'triggers', title: 'Question #5', description: 'What are your relapse triggers?'},
+    { id: 'motivation', title: 'Question #6', description: 'Why do you want to be free?'},
+    { id: 'goal', title: 'Question #7', description: 'What is your initial goal?' },
     { id: 'pledge', title: 'Sign your commitment', description: 'Promise yourself that you will never do it again.' },
     { id: 'credentials', title: 'Create your account', description: 'Almost there! Secure your journey.' },
 ]
@@ -61,8 +67,11 @@ export default function SignupPage() {
   const [selectedCategory, setSelectedCategory] =
     useState<AddictionCategory | null>(null);
   const [name, setName] = useState("");
+  const [age, setAge] = useState("");
+  const [socialPlatform, setSocialPlatform] = useState("");
+  const [triggers, setTriggers] = useState("");
+  const [motivation, setMotivation] = useState("");
   const [goal, setGoal] = useState(90);
-  const [pledge, setPledge] = useState("");
   const router = useRouter();
 
   const handleNext = () => {
@@ -72,7 +81,10 @@ export default function SignupPage() {
       if (typeof window !== 'undefined') {
         localStorage.setItem("userName", name);
         localStorage.setItem("userGoal", goal.toString());
-        // Pledge is now the signature, which we aren't saving yet.
+        localStorage.setItem("userAge", age);
+        localStorage.setItem("userSocial", socialPlatform);
+        localStorage.setItem("userTriggers", triggers);
+        localStorage.setItem("userMotivation", motivation);
       }
       router.push("/subscribe");
     }
@@ -95,7 +107,7 @@ export default function SignupPage() {
   const currentQuestion = questions[step - 1];
 
   const getDynamicDescription = () => {
-    if (step === 5 && selectedCategory) {
+    if (step === 9 && selectedCategory) {
       const categoryTextMap = {
         Porn: 'watch porn',
         Alcohol: 'drink alcohol',
@@ -141,9 +153,13 @@ export default function SignupPage() {
                 {step === 1 && <Step1 onNext={handleNext} />}
                 {step === 2 && <Step2 onSelect={handleCategorySelect} />}
                 {step === 3 && <StepName name={name} setName={setName} onNext={handleNext} />}
-                {step === 4 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
-                {step === 5 && <StepSignature onNext={handleNext} />}
-                {step === 6 && <StepCredentials onNext={handleNext} />}
+                {step === 4 && <StepAge age={age} setAge={setAge} onNext={handleNext} />}
+                {step === 5 && <StepSocial socialPlatform={socialPlatform} setSocialPlatform={setSocialPlatform} onNext={handleNext} />}
+                {step === 6 && <StepTriggers triggers={triggers} setTriggers={setTriggers} onNext={handleNext} />}
+                {step === 7 && <StepMotivation motivation={motivation} setMotivation={setMotivation} onNext={handleNext} />}
+                {step === 8 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
+                {step === 9 && <StepSignature onNext={handleNext} />}
+                {step === 10 && <StepCredentials onNext={handleNext} />}
             </div>
 
              <div className="text-center text-sm text-muted-foreground">
@@ -193,7 +209,7 @@ function Step2({ onSelect }: { onSelect: (category: AddictionCategory) => void }
 function StepName({ name, setName, onNext }: { name: string; setName: (n: string) => void; onNext: () => void }) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onNext();
+        if (name.trim()) onNext();
     }
     return (
         <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
@@ -204,6 +220,7 @@ function StepName({ name, setName, onNext }: { name: string; setName: (n: string
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
                 className="h-14 text-center text-lg bg-secondary/50 rounded-full border-border focus:border-primary max-w-xs"
+                required
             />
             <Button type="submit" size="lg" className="w-full max-w-xs rounded-full">
                 Continue
@@ -211,6 +228,99 @@ function StepName({ name, setName, onNext }: { name: string; setName: (n: string
         </form>
     )
 }
+
+function StepAge({ age, setAge, onNext }: { age: string; setAge: (a: string) => void; onNext: () => void }) {
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (age) onNext();
+    }
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+             <Input 
+                id="age" 
+                type="number" 
+                placeholder="Enter your age..." 
+                value={age} 
+                onChange={(e) => setAge(e.target.value)} 
+                className="h-14 text-center text-lg bg-secondary/50 rounded-full border-border focus:border-primary max-w-xs"
+                required
+            />
+            <Button type="submit" size="lg" className="w-full max-w-xs rounded-full">
+                Continue
+            </Button>
+        </form>
+    )
+}
+
+function StepSocial({ socialPlatform, setSocialPlatform, onNext }: { socialPlatform: string; setSocialPlatform: (s: string) => void; onNext: () => void }) {
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (socialPlatform) onNext();
+    }
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+            <Select onValueChange={setSocialPlatform} value={socialPlatform}>
+                <SelectTrigger className="w-full max-w-xs h-14 text-center text-lg bg-secondary/50 rounded-full border-border focus:border-primary">
+                    <SelectValue placeholder="Select a platform" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="Facebook">Facebook</SelectItem>
+                    <SelectItem value="Instagram">Instagram</SelectItem>
+                    <SelectItem value="TikTok">TikTok</SelectItem>
+                    <SelectItem value="Twitter">Twitter/X</SelectItem>
+                    <SelectItem value="Reddit">Reddit</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+            </Select>
+            <Button type="submit" size="lg" className="w-full max-w-xs rounded-full">
+                Continue
+            </Button>
+        </form>
+    )
+}
+
+function StepTriggers({ triggers, setTriggers, onNext }: { triggers: string, setTriggers: (t: string) => void, onNext: () => void }) {
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onNext();
+    }
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+             <Textarea
+                id="triggers"
+                placeholder="e.g., stress, boredom, loneliness..."
+                value={triggers}
+                onChange={(e) => setTriggers(e.target.value)}
+                className="bg-secondary/50 rounded-2xl border-border focus:border-primary max-w-xs min-h-[150px] text-base p-4"
+            />
+            <Button type="submit" size="lg" className="w-full max-w-xs rounded-full">
+                Continue
+            </Button>
+        </form>
+    )
+}
+
+function StepMotivation({ motivation, setMotivation, onNext }: { motivation: string, setMotivation: (m: string) => void, onNext: () => void }) {
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onNext();
+    }
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+             <Textarea
+                id="motivation"
+                placeholder="e.g., to be healthier, improve relationships..."
+                value={motivation}
+                onChange={(e) => setMotivation(e.target.value)}
+                className="bg-secondary/50 rounded-2xl border-border focus:border-primary max-w-xs min-h-[150px] text-base p-4"
+            />
+            <Button type="submit" size="lg" className="w-full max-w-xs rounded-full">
+                Continue
+            </Button>
+        </form>
+    )
+}
+
 
 function StepGoal({ goal, setGoal, onNext }: { goal: number; setGoal: (g: number) => void; onNext: () => void }) {
     const handleSubmit = (e: React.FormEvent) => {
@@ -295,4 +405,3 @@ function StepCredentials({ onNext }: { onNext: () => void }) {
       </form>
   );
 }
-
