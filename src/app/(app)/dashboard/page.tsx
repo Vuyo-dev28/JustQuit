@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Check, Flame, Plus, Star, Target, TrendingUp, NotebookText } from "lucide-react";
+import { Check, Flame, Plus, Star, Target, TrendingUp, NotebookText, ShieldAlert } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -31,6 +31,17 @@ import {
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { useToast } from "@/hooks/use-toast";
 import Confetti from "@/components/shared/Confetti";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 
 const chartData = [
@@ -83,6 +94,24 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold font-headline">Good morning,</h1>
           <p className="text-muted-foreground">Ready to conquer the day?</p>
         </div>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" size="icon" className="h-12 w-12 rounded-full">
+              <ShieldAlert className="h-6 w-6" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Emergency Help</AlertDialogTitle>
+              <AlertDialogDescription>
+                You've got this. Take a deep breath. Here's a quick exercise or a motivational quote. (This will be implemented later).
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Close</AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </header>
 
       <div className="grid gap-4 md:grid-cols-2 grid-cols-1">

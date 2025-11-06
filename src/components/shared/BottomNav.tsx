@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Settings, TrendingUp } from "lucide-react";
+import { BookHeart, LayoutGrid, Settings, TrendingUp } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
   { href: "/progress", label: "Progress", icon: TrendingUp },
+  { href: "/journal", label: "Journal", icon: BookHeart },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -19,13 +20,13 @@ export default function BottomNav() {
     <nav className="fixed bottom-0 left-0 right-0 h-16 bg-card border-t border-border/80 shadow-[0_-1px_4px_rgba(0,0,0,0.05)]">
       <div className="flex justify-around items-center h-full max-w-md mx-auto">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname.startsWith(item.href);
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center text-muted-foreground w-1/3 transition-colors duration-200",
+                "flex flex-col items-center justify-center text-muted-foreground w-1/4 transition-colors duration-200",
                 isActive && "text-primary"
               )}
             >
