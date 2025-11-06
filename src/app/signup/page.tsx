@@ -66,11 +66,11 @@ export default function SignupPage() {
     if (step < totalSteps) {
       setStep(step + 1);
     } else {
-      // Final step: save name and redirect to dashboard
+      // Final step: save name and redirect to subscription page
       if (typeof window !== 'undefined') {
         localStorage.setItem("userName", name);
       }
-      router.push("/dashboard");
+      router.push("/subscribe");
     }
   };
 
