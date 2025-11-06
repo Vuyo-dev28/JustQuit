@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -30,45 +31,6 @@ const premiumContent = [
 
 export default function PremiumPage() {
     const router = useRouter();
-    const [isSubscribed, setIsSubscribed] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const checkSubscription = () => {
-            if (typeof window !== 'undefined') {
-                const subscribed = localStorage.getItem('isSubscribed') === 'true';
-                setIsSubscribed(subscribed);
-                if (!subscribed) {
-                    // Redirect after a short delay to show the message
-                    setTimeout(() => router.push('/subscribe'), 2000);
-                }
-            }
-            setIsLoading(false);
-        };
-
-        checkSubscription();
-    }, [router]);
-
-    if (isLoading) {
-        return (
-             <div className="p-4 flex items-center justify-center h-full">
-                <p className="text-muted-foreground">Checking subscription status...</p>
-            </div>
-        )
-    }
-
-    if (!isSubscribed) {
-        return (
-            <div className="p-4 space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 flex flex-col items-center justify-center text-center h-full">
-                <Lock className="h-16 w-16 text-destructive" />
-                <h1 className="text-2xl font-bold font-headline">Access Denied</h1>
-                <p className="text-muted-foreground max-w-md">
-                    This is a premium feature. Please subscribe to unlock this content and more.
-                </p>
-                <p className="text-sm text-muted-foreground">Redirecting you to the subscription page...</p>
-            </div>
-        );
-    }
 
     return (
         <div className="p-4 space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">

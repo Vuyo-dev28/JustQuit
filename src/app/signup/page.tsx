@@ -88,7 +88,7 @@ export default function SignupPage() {
         localStorage.setItem("userTriggers", triggers);
         localStorage.setItem("userMotivation", motivation);
       }
-      router.push("/subscribe");
+      router.push("/dashboard");
     }
   };
 
