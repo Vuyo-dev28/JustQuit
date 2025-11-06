@@ -11,16 +11,15 @@ import {
 } from "recharts";
 import { Check, Flame, Plus, Star, Target, TrendingUp, NotebookText } from "lucide-react";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -93,29 +92,34 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground">
               You're doing great!
             </p>
-             <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button size="sm" className="w-full" disabled={hasLoggedToday}>
-                    {hasLoggedToday ? <Check className="mr-2"/> : <Plus className="mr-2" />}
-                    {hasLoggedToday ? 'Logged for Today' : 'Log Today\'s Progress'}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Log Your Progress</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Did you stay on track with your goal today? Be honest, every step counts.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogAction onClick={() => handleLogProgress(true)}>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button size="sm" className="w-full" disabled={hasLoggedToday}>
+                  {hasLoggedToday ? <Check className="mr-2"/> : <Plus className="mr-2" />}
+                  {hasLoggedToday ? 'Logged for Today' : 'Log Today\'s Progress'}
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="rounded-t-lg">
+                <SheetHeader className="text-center">
+                  <SheetTitle>Log Your Progress</SheetTitle>
+                  <SheetDescription>
+                    Did you stay on track with your goal today? Be honest, every step counts.
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="grid gap-4 py-8">
+                  <SheetClose asChild>
+                    <Button size="lg" onClick={() => handleLogProgress(true)}>
                       Yes, I did!
-                    </AlertDialogAction>
-                    <Button variant="destructive" onClick={() => handleLogProgress(false)}>No, I slipped up</Button>
-                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                    </Button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Button size="lg" variant="destructive" onClick={() => handleLogProgress(false)}>
+                      No, I slipped up
+                    </Button>
+                  </SheetClose>
+                </div>
+              </SheetContent>
+            </Sheet>
           </CardContent>
         </Card>
         <Card>
