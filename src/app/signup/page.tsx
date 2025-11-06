@@ -236,15 +236,19 @@ function StepAge({ age, setAge, onNext }: { age: string; setAge: (a: string) => 
     }
     return (
         <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
-             <Input 
-                id="age" 
-                type="number" 
-                placeholder="Enter your age..." 
-                value={age} 
-                onChange={(e) => setAge(e.target.value)} 
-                className="h-14 text-center text-lg bg-secondary/50 rounded-full border-border focus:border-primary max-w-xs"
-                required
-            />
+            <Select onValueChange={setAge} value={age}>
+                <SelectTrigger className="w-full max-w-xs h-14 text-center text-lg bg-secondary/50 rounded-full border-border focus:border-primary">
+                    <SelectValue placeholder="Select your age range" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="<18">&lt; 18</SelectItem>
+                    <SelectItem value="18-24">18-24</SelectItem>
+                    <SelectItem value="25-34">25-34</SelectItem>
+                    <SelectItem value="35-44">35-44</SelectItem>
+                    <SelectItem value="45-54">45-54</SelectItem>
+                    <SelectItem value="55+">55+</SelectItem>
+                </SelectContent>
+            </Select>
             <Button type="submit" size="lg" className="w-full max-w-xs rounded-full">
                 Continue
             </Button>
