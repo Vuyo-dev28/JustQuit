@@ -91,25 +91,33 @@ export default function SettingsPage() {
   };
 
   const handleResetProgress = () => {
-    // This could be expanded to clear more data
     localStorage.removeItem("userName");
     localStorage.removeItem("userPledge");
     localStorage.removeItem("userGoal");
     localStorage.removeItem("userProfilePic");
     localStorage.removeItem("slipUpCount");
+    localStorage.removeItem("currentStreak");
+    localStorage.removeItem("longestStreak");
+    localStorage.removeItem("lastLogDate");
     
     toast({
       variant: "destructive",
       title: "Progress Reset",
-      description: "Your streak and progress have been cleared. It's a fresh start!",
+      description: "Your data has been cleared. It's a fresh start!",
     });
     
+    // Reset state to default
+    setName("");
+    setPledge("");
     setGoal(90);
     setNewGoal(90);
-    setPledge("");
-    setName("");
     setProfilePic(null);
+
+    // Consider redirecting or reloading the app state
+    // For now, this just clears local and component state.
+     setTimeout(() => window.location.reload(), 1000);
   };
+
 
   const handleProfilePicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {

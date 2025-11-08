@@ -77,6 +77,10 @@ export default function DashboardPage() {
   const [profilePic, setProfilePic] = useState<string | null>(null);
   const [pledge, setPledge] = useState("");
   const [goal, setGoal] = useState(90);
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [longestStreak, setLongestStreak] = useState(0);
+  const [showSlipUpDialog, setShowSlipUpDialog] = useState(false);
+
 
   useEffect(() => {
     const storedName = localStorage.getItem("userName");
@@ -85,6 +89,9 @@ export default function DashboardPage() {
     const storedProfilePic = localStorage.getItem("userProfilePic");
     const storedPledge = localStorage.getItem("userPledge");
     const storedGoal = localStorage.getItem("userGoal");
+    const storedStreak = localStorage.getItem("currentStreak");
+    const storedLongestStreak = localStorage.getItem("longestStreak");
+    const storedLastLogDate = localStorage.getItem("lastLogDate");
 
     if (storedName) setName(storedName);
     if (storedCategory && failureReasons[storedCategory]) {
@@ -95,13 +102,25 @@ export default function DashboardPage() {
     if (storedProfilePic) setProfilePic(storedProfilePic);
     if (storedPledge) setPledge(storedPledge);
     if (storedGoal) setGoal(parseInt(storedGoal, 10));
+    if (storedStreak) setCurrentStreak(parseInt(storedStreak, 10));
+    if (storedLongestStreak) setLongestStreak(parseInt(storedLongestStreak, 10));
+    if (storedLastLogDate) setLastLogDate(storedLastLogDate);
 
   }, []);
 
   const handleLogProgress = (success: boolean) => {
     const today = new Date().toDateString();
-    setLastLogDate(today);
+    
     if (success) {
+      const newStreak = currentStreak + 1;
+      setCurrentStreak(newStreak);
+      localStorage.setItem("currentStreak", newStreak.toString());
+
+      if (newStreak > longestStreak) {
+          setLongestStreak(newStreak);
+          localStorage.setItem("longestStreak", newStreak.toString());
+      }
+
       setShowConfetti(true);
       toast({
         title: "You did it! 🎉",
@@ -111,12 +130,13 @@ export default function DashboardPage() {
       const newSlipUpCount = slipUpCount + 1;
       setSlipUpCount(newSlipUpCount);
       localStorage.setItem("slipUpCount", newSlipUpCount.toString());
-      toast({
-        title: "Log Recorded",
-        description: "Tomorrow is a new day to get back on track.",
-        variant: "default",
-      });
+      setCurrentStreak(0);
+      localStorage.setItem("currentStreak", "0");
+      setShowSlipUpDialog(true);
     }
+    
+    setLastLogDate(today);
+    localStorage.setItem("lastLogDate", today);
   };
   
   const hasLoggedToday = lastLogDate === new Date().toDateString();
@@ -164,7 +184,7 @@ export default function DashboardPage() {
             <Flame className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="text-2xl font-bold">5 days</div>
+            <div className="text-2xl font-bold">{currentStreak} {currentStreak === 1 ? 'day' : 'days'}</div>
             <p className="text-xs text-muted-foreground">
               You're doing great!
             </p>
@@ -204,7 +224,7 @@ export default function DashboardPage() {
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">14 days</div>
+            <div className="text-2xl font-bold">{longestStreak} {longestStreak === 1 ? 'day' : 'days'}</div>
             <p className="text-xs text-muted-foreground">
               Your personal best!
             </p>
@@ -314,5 +334,27 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       )}
+
+      <AlertDialog open={showSlipUpDialog} onOpenChange={setShowSlipUpDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>It's Okay, This is a New Day</AlertDialogTitle>
+            <AlertDialogDescription>
+              A slip-up is not a fall. It's a learning opportunity. The journey to overcoming any challenge has its ups and downs. What matters is that you're back, ready to try again.
+              <br /><br />
+              <strong>Your streak has been reset, but your progress is not lost.</strong> You've learned something valuable. Let's start this new day with strength.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowSlipUpDialog(false)}>
+              I'm Ready
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   );
+}
+
+    
