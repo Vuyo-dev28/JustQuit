@@ -1,4 +1,7 @@
-import { NotebookText, Target, TrendingUp } from "lucide-react";
+
+'use client';
+
+import { NotebookText, Target } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -6,9 +9,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { milestones } from "@/lib/milestones";
+import MilestoneBadge from "@/components/shared/MilestoneBadge";
+import { useEffect, useState } from "react";
 
 export default function ProgressPage() {
+    const [currentStreak, setCurrentStreak] = useState(0);
+
+    useEffect(() => {
+        // This is a placeholder for fetching the real streak.
+        // In a real app, this would come from a database or localStorage.
+        const fakeStreak = 25; 
+        setCurrentStreak(fakeStreak);
+    }, []);
+
   return (
     <div className="p-4 space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
       <header>
@@ -41,23 +55,19 @@ export default function ProgressPage() {
         </Card>
       </div>
 
-      <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-300 fill-mode-both">
-        <CardHeader>
-          <CardTitle>Progress History</CardTitle>
-          <CardDescription>
-            Detailed charts and a full calendar view of your progress will be available here soon.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex items-center justify-center text-muted-foreground h-48">
-          <TrendingUp className="h-16 w-16" />
-        </CardContent>
-      </Card>
-
       <div className="space-y-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-400 fill-mode-both">
         <h2 className="text-lg font-semibold">Milestones</h2>
         <Card>
           <CardContent className="p-4">
-            <p className="text-muted-foreground">Milestones you've achieved will appear here.</p>
+             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                {milestones.map((milestone) => (
+                    <MilestoneBadge
+                        key={milestone.days}
+                        milestone={milestone}
+                        isAchieved={currentStreak >= milestone.days}
+                    />
+                ))}
+            </div>
           </CardContent>
         </Card>
       </div>
