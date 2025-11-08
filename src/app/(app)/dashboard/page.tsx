@@ -45,6 +45,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { AddictionCategory } from "@/lib/types";
 import { failureReasons } from "@/lib/data";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { User } from "lucide-react";
 
 
 const chartData = [
@@ -72,21 +74,28 @@ export default function DashboardPage() {
   const [reasons, setReasons] = useState<string[]>([]);
   const [category, setCategory] = useState<AddictionCategory | null>(null);
   const [slipUpCount, setSlipUpCount] = useState(0);
+  const [profilePic, setProfilePic] = useState<string | null>(null);
+  const [pledge, setPledge] = useState("");
+  const [goal, setGoal] = useState(90);
 
   useEffect(() => {
     const storedName = localStorage.getItem("userName");
-    if (storedName) {
-      setName(storedName);
-    }
     const storedCategory = localStorage.getItem("addictionCategory") as AddictionCategory | null;
+    const storedSlipUps = localStorage.getItem("slipUpCount");
+    const storedProfilePic = localStorage.getItem("userProfilePic");
+    const storedPledge = localStorage.getItem("userPledge");
+    const storedGoal = localStorage.getItem("userGoal");
+
+    if (storedName) setName(storedName);
     if (storedCategory && failureReasons[storedCategory]) {
       setCategory(storedCategory);
       setReasons(failureReasons[storedCategory]);
     }
-    const storedSlipUps = localStorage.getItem("slipUpCount");
-    if (storedSlipUps) {
-      setSlipUpCount(parseInt(storedSlipUps, 10));
-    }
+    if (storedSlipUps) setSlipUpCount(parseInt(storedSlipUps, 10));
+    if (storedProfilePic) setProfilePic(storedProfilePic);
+    if (storedPledge) setPledge(storedPledge);
+    if (storedGoal) setGoal(parseInt(storedGoal, 10));
+
   }, []);
 
   const handleLogProgress = (success: boolean) => {
@@ -115,10 +124,18 @@ export default function DashboardPage() {
   return (
     <div className="p-4 space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
       {showConfetti && <Confetti onComplete={() => setShowConfetti(false)} />}
-      <header className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold font-headline">Good morning, {name}</h1>
-          <p className="text-muted-foreground">Ready to conquer the day?</p>
+      <header className="flex justify-between items-start">
+        <div className="flex items-center gap-4">
+            <Avatar className="h-16 w-16">
+              <AvatarImage src={profilePic ?? undefined} alt="Profile picture" />
+              <AvatarFallback>
+                <User className="h-8 w-8 text-muted-foreground" />
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h1 className="text-2xl font-bold font-headline">Good morning, {name || 'User'}</h1>
+              <p className="text-muted-foreground">Ready to conquer the day?</p>
+            </div>
         </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
@@ -202,7 +219,7 @@ export default function DashboardPage() {
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">90 days</div>
+            <div className="text-2xl font-bold">{goal} days</div>
             <p className="text-xs text-muted-foreground">
               Keep your eyes on the prize.
             </p>
@@ -227,7 +244,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
              <p className="text-sm text-muted-foreground truncate italic">
-              "I commit to my well-being and a better future."
+              {pledge || "Make your pledge in settings."}
             </p>
           </CardContent>
         </Card>
@@ -299,5 +316,3 @@ export default function DashboardPage() {
       )}
     </div>
   );
-
-    

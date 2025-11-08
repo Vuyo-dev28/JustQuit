@@ -14,13 +14,21 @@ import MilestoneBadge from "@/components/shared/MilestoneBadge";
 import { useEffect, useState } from "react";
 
 export default function ProgressPage() {
-    const [currentStreak, setCurrentStreak] = useState(0);
+    const [currentStreak, setCurrentStreak] = useState(5); // Default to a value that shows some progress
+    const [goal, setGoal] = useState(90);
+    const [pledge, setPledge] = useState("");
 
     useEffect(() => {
-        // This is a placeholder for fetching the real streak.
         // In a real app, this would come from a database or localStorage.
-        const fakeStreak = 25; 
+        const fakeStreak = 5; 
         setCurrentStreak(fakeStreak);
+
+        const storedGoal = localStorage.getItem('userGoal');
+        if (storedGoal) setGoal(parseInt(storedGoal, 10));
+
+        const storedPledge = localStorage.getItem('userPledge');
+        if (storedPledge) setPledge(storedPledge);
+
     }, []);
 
   return (
@@ -37,7 +45,7 @@ export default function ProgressPage() {
               <Target className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">90 days</div>
+              <div className="text-2xl font-bold">{goal} days</div>
             </CardContent>
         </Card>
         <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-200 fill-mode-both">
@@ -45,11 +53,11 @@ export default function ProgressPage() {
             <CardTitle className="text-sm font-medium flex items-center justify-between">
               Your Pledge
               <NotebookText className="h-4 w-4 text-muted-foreground" />
-            </CardTitle>
+            </Title>
           </CardHeader>
           <CardContent>
              <p className="text-sm text-muted-foreground truncate italic">
-              "I commit to my well-being and a better future."
+              {pledge || "Make your pledge in settings."}
             </p>
           </CardContent>
         </Card>
