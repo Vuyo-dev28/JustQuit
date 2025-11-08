@@ -53,7 +53,7 @@ export default function ProgressPage() {
             <CardTitle className="text-sm font-medium flex items-center justify-between">
               Your Pledge
               <NotebookText className="h-4 w-4 text-muted-foreground" />
-            </Title>
+            </CardTitle>
           </CardHeader>
           <CardContent>
              <p className="text-sm text-muted-foreground truncate italic">
