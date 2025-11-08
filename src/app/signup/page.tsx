@@ -6,6 +6,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SignatureCanvas from "react-signature-canvas";
 import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
   ArrowLeft,
   CigaretteOff,
   EyeOff,
@@ -28,7 +36,11 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
@@ -494,6 +506,22 @@ function StepGoal({ goal, setGoal, onNext }: { goal: number; setGoal: (g: number
     )
 }
 
+const chartData = [
+  { trigger: "Stress", prevalence: 85 },
+  { trigger: "Boredom", prevalence: 70 },
+  { trigger: "Social", prevalence: 60 },
+  { trigger: "Habit", prevalence: 55 },
+  { trigger: "Loneliness", prevalence: 45 },
+];
+
+const chartConfig = {
+  prevalence: {
+    label: "Prevalence",
+    color: "hsl(var(--primary))",
+  },
+};
+
+
 function StepAiAnalysis({ data, onNext }: { data: any, onNext: () => void }) {
     const [analysis, setAnalysis] = useState<AnalyzeUserProblemsOutput | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -546,6 +574,51 @@ function StepAiAnalysis({ data, onNext }: { data: any, onNext: () => void }) {
                     )}
                 </CardContent>
             </Card>
+
+             <Card className="w-full max-w-md bg-secondary/30">
+                <CardHeader>
+                    <CardTitle className="text-lg">Context: Common Triggers</CardTitle>
+                    <CardDescription>
+                        This chart shows illustrative data on how common certain triggers are.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ChartContainer config={chartConfig} className="h-48 w-full">
+                        <BarChart accessibilityLayer data={chartData} layout="vertical" margin={{ left: 10 }}>
+                             <defs>
+                                <linearGradient id="fillPrevalence" x1="0" y1="0" x2="1" y2="0">
+                                <stop
+                                    offset="5%"
+                                    stopColor="var(--color-prevalence)"
+                                    stopOpacity={0.8}
+                                />
+                                <stop
+                                    offset="95%"
+                                    stopColor="var(--color-prevalence)"
+                                    stopOpacity={0.1}
+                                />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid horizontal={false} />
+                            <YAxis 
+                                dataKey="trigger" 
+                                type="category" 
+                                tickLine={false} 
+                                axisLine={false}
+                                tick={{ fill: 'hsl(var(--foreground))', fontSize: 12 }}
+                            />
+                            <XAxis type="number" hide={true} />
+                            <ChartTooltip
+                                cursor={false}
+                                content={<ChartTooltipContent indicator="dot" />}
+                            />
+                            <Bar dataKey="prevalence" fill="url(#fillPrevalence)" radius={5} />
+                        </BarChart>
+                    </ChartContainer>
+                </CardContent>
+            </Card>
+
+
              <Button onClick={onNext} size="lg" className="w-full max-w-xs rounded-full">
                 Continue to Final Step
             </Button>
@@ -610,6 +683,8 @@ function StepCredentials({ onNext }: { onNext: () => void }) {
       </form>
   );
 }
+
+    
 
     
 
