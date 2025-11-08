@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -76,8 +77,7 @@ export default function BottomNav() {
                       pathname.startsWith(premiumItem.href) && "text-primary"
                     )}
                   >
-                    <premiumItem.icon className="h-6 w-6 mb-1" />
-                    <span className="text-xs font-medium">{premiumItem.label}</span>
+                    <premiumItem.icon className="h-6 w-6" />
                   </Link>
             </div>
 
