@@ -75,8 +75,8 @@ const questions = [
     { id: 'goals', title: 'Question #6', description: 'What are your primary goals?'},
     { id: 'triggers', title: 'Question #7', description: 'What are your relapse triggers?'},
     { id: 'motivation', title: 'Question #8', description: 'Why do you want to be free?'},
-    { id: 'goal', title: 'Question #9', description: 'What is your initial goal?' },
     { id: 'analysis', title: 'Your Personal Analysis', description: 'Based on your answers, here is a starting point for your journey.' },
+    { id: 'goal', title: 'Question #9', description: 'What is your initial goal?' },
     { id: 'pledge', title: 'Sign your commitment', description: 'Promise yourself that you will never do it again.' },
     { id: 'credentials', title: 'Create your account', description: 'Almost there! Secure your journey.' },
 ]
@@ -167,7 +167,7 @@ export default function SignupPage() {
                 <div className="w-full mx-8">
                     <Progress value={(step / totalSteps) * 100} className="h-2" />
                 </div>
-                 {step === totalSteps || step === 11 ? <div className="w-9 h-9"/> : (
+                 {step === totalSteps || step === 10 ? <div className="w-9 h-9"/> : (
                      <Button variant="link" onClick={handleNext} className="text-muted-foreground p-0 h-9 w-9 text-sm">
                         Skip
                     </Button>
@@ -191,8 +191,8 @@ export default function SignupPage() {
                 {step === 7 && <StepChooseGoals chosenGoals={chosenGoals} setChosenGoals={setChosenGoals} onNext={handleNext} />}
                 {step === 8 && <StepTriggers category={selectedCategory} triggers={triggers} setTriggers={setTriggers} onNext={handleNext} />}
                 {step === 9 && <StepMotivation motivation={motivation} setMotivation={setMotivation} onNext={handleNext} />}
-                {step === 10 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
-                {step === 11 && <StepAiAnalysis data={signupData} onNext={handleNext} />}
+                {step === 10 && <StepAiAnalysis data={signupData} onNext={handleNext} />}
+                {step === 11 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
                 {step === 12 && <StepSignature onNext={handleNext} />}
                 {step === 13 && <StepCredentials onNext={handleNext} />}
             </div>
@@ -610,5 +610,7 @@ function StepCredentials({ onNext }: { onNext: () => void }) {
       </form>
   );
 }
+
+    
 
     
