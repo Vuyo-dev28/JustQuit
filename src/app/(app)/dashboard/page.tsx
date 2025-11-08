@@ -47,9 +47,10 @@ import type { AddictionCategory } from "@/lib/types";
 import { failureReasons } from "@/lib/data";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
-const chartData = [
+const weeklyChartData = [
   { day: "Mon", days: 1 },
   { day: "Tue", days: 2 },
   { day: "Wed", days: 3 },
@@ -57,6 +58,13 @@ const chartData = [
   { day: "Fri", days: 3 },
   { day: "Sat", days: 4 },
   { day: "Sun", days: 5 },
+];
+
+const monthlyChartData = [
+  { week: "Week 1", days: 5 },
+  { week: "Week 2", days: 6 },
+  { week: "Week 3", days: 4 },
+  { week: "Week 4", days: 7 },
 ];
 
 const chartConfig = {
@@ -272,46 +280,90 @@ export default function DashboardPage() {
 
       <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-600 fill-mode-both">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Weekly Streak
-          </CardTitle>
+            <div className="flex justify-between items-center">
+                <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    Progress Stats
+                </CardTitle>
+            </div>
         </CardHeader>
         <CardContent>
-          <ChartContainer config={chartConfig} className="h-48 w-full">
-            <BarChart accessibilityLayer data={chartData}>
-              <defs>
-                <linearGradient id="fillDays" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="var(--color-days)"
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="var(--color-days)"
-                    stopOpacity={0.1}
-                  />
-                </linearGradient>
-              </defs>
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="day"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-                tickFormatter={(value) => value.slice(0, 3)}
-              />
-              <YAxis hide={true} />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent indicator="dot" />}
-              />
-              <Bar dataKey="days" fill="url(#fillDays)" radius={8} />
-            </BarChart>
-          </ChartContainer>
+            <Tabs defaultValue="weekly">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="weekly">Weekly</TabsTrigger>
+                    <TabsTrigger value="monthly">Monthly</TabsTrigger>
+                </TabsList>
+                <TabsContent value="weekly">
+                    <ChartContainer config={chartConfig} className="h-48 w-full mt-4">
+                        <BarChart accessibilityLayer data={weeklyChartData}>
+                            <defs>
+                                <linearGradient id="fillDays" x1="0" y1="0" x2="0" y2="1">
+                                <stop
+                                    offset="5%"
+                                    stopColor="var(--color-days)"
+                                    stopOpacity={0.8}
+                                />
+                                <stop
+                                    offset="95%"
+                                    stopColor="var(--color-days)"
+                                    stopOpacity={0.1}
+                                />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                                dataKey="day"
+                                tickLine={false}
+                                tickMargin={10}
+                                axisLine={false}
+                                tickFormatter={(value) => value.slice(0, 3)}
+                            />
+                            <YAxis hide={true} />
+                            <ChartTooltip
+                                cursor={false}
+                                content={<ChartTooltipContent indicator="dot" />}
+                            />
+                            <Bar dataKey="days" fill="url(#fillDays)" radius={8} />
+                        </BarChart>
+                    </ChartContainer>
+                </TabsContent>
+                <TabsContent value="monthly">
+                    <ChartContainer config={chartConfig} className="h-48 w-full mt-4">
+                        <BarChart accessibilityLayer data={monthlyChartData}>
+                            <defs>
+                                <linearGradient id="fillDays" x1="0" y1="0" x2="0" y2="1">
+                                <stop
+                                    offset="5%"
+                                    stopColor="var(--color-days)"
+                                    stopOpacity={0.8}
+                                />
+                                <stop
+                                    offset="95%"
+                                    stopColor="var(--color-days)"
+                                    stopOpacity={0.1}
+                                />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                                dataKey="week"
+                                tickLine={false}
+                                tickMargin={10}
+                                axisLine={false}
+                            />
+                            <YAxis hide={true} />
+                            <ChartTooltip
+                                cursor={false}
+                                content={<ChartTooltipContent indicator="dot" />}
+                            />
+                            <Bar dataKey="days" fill="url(#fillDays)" radius={8} />
+                        </BarChart>
+                    </ChartContainer>
+                </TabsContent>
+            </Tabs>
         </CardContent>
       </Card>
+
 
       {reasons.length > 0 && (
         <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-700 fill-mode-both">
@@ -355,6 +407,5 @@ export default function DashboardPage() {
 
     </div>
   );
-}
 
     
