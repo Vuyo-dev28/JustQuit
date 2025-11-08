@@ -15,7 +15,7 @@ const AnalyzeUserProblemsInputSchema = z.object({
   category: z.string().optional().describe('The addiction category the user selected (e.g., Porn, Alcohol, Smoking).'),
   age: z.string().optional().describe('The age range of the user.'),
   gender: z.string().optional().describe('The gender of the user.'),
-  triggers: z.string().optional().describe('The relapse triggers the user identified.'),
+  triggers: z.array(z.string()).optional().describe('The relapse triggers the user identified.'),
   motivation: z.string().optional().describe('The user\'s stated motivation for quitting.'),
   goals: z.array(z.string()).optional().describe('The goals the user wants to achieve.'),
 });
@@ -50,9 +50,9 @@ Your task is to provide a brief, personalized analysis for a new user based on t
 - Addiction Category: {{{category}}}
 - Age Range: {{{age}}}
 - Gender: {{{gender}}}
-- Identified Triggers: {{{triggers}}}
+- Identified Triggers: {{#each triggers}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
 - Stated Motivation: {{{motivation}}}
-- Personal Goals: {{{goals}}}
+- Personal Goals: {{#each goals}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
 
 **Your Response:**
 
@@ -70,7 +70,7 @@ Generate a response with two parts:
 
 **Example Output:**
 
-"summary": "Taking this step to regain control from {{{category}}} is a powerful act of self-care. It's inspiring that you're driven by a desire for {{{motivation}}} and want to achieve goals like {{{goals}}}. Understanding that {{{triggers}}} is a key challenge is the first step to developing new, healthier coping strategies."
+"summary": "Taking this step to regain control from {{{category}}} is a powerful act of self-care. It's inspiring that you're driven by a desire for {{{motivation}}} and want to achieve goals like {{#each goals}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}. Understanding that {{#each triggers}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}} is a key challenge is the first step to developing new, healthier coping strategies."
 "stats": "You're not alone. Many people who struggle with {{{category}}} report that stress and boredom are major factors, and millions have successfully quit, finding new freedom and improved well-being."
 
 ---
@@ -91,3 +91,5 @@ const analyzeUserProblemsFlow = ai.defineFlow(
     return output;
   }
 );
+
+    

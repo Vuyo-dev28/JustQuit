@@ -39,6 +39,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { analyzeUserProblems, type AnalyzeUserProblemsOutput } from "@/ai/flows/analyze-user-problems";
 import { Skeleton } from "@/components/ui/skeleton";
+import { failureReasons } from "@/lib/data";
+
 
 const categories: Category[] = [
   {
@@ -88,7 +90,7 @@ export default function SignupPage() {
   const [age, setAge] = useState("");
   const [socialPlatform, setSocialPlatform] = useState("");
   const [chosenGoals, setChosenGoals] = useState<string[]>([]);
-  const [triggers, setTriggers] = useState("");
+  const [triggers, setTriggers] = useState<string[]>([]);
   const [motivation, setMotivation] = useState("");
   const [goal, setGoal] = useState(90);
   const router = useRouter();
@@ -104,7 +106,7 @@ export default function SignupPage() {
         localStorage.setItem("userAge", age);
         localStorage.setItem("userSocial", socialPlatform);
         localStorage.setItem("userGoals", JSON.stringify(chosenGoals));
-        localStorage.setItem("userTriggers", triggers);
+        localStorage.setItem("userTriggers", JSON.stringify(triggers));
         localStorage.setItem("userMotivation", motivation);
         if (selectedCategory) {
           localStorage.setItem("addictionCategory", selectedCategory);
@@ -187,7 +189,7 @@ export default function SignupPage() {
                 {step === 5 && <StepAge age={age} setAge={setAge} onNext={handleNext} />}
                 {step === 6 && <StepSocial socialPlatform={socialPlatform} setSocialPlatform={setSocialPlatform} onNext={handleNext} />}
                 {step === 7 && <StepChooseGoals chosenGoals={chosenGoals} setChosenGoals={setChosenGoals} onNext={handleNext} />}
-                {step === 8 && <StepTriggers triggers={triggers} setTriggers={setTriggers} onNext={handleNext} />}
+                {step === 8 && <StepTriggers category={selectedCategory} triggers={triggers} setTriggers={setTriggers} onNext={handleNext} />}
                 {step === 9 && <StepMotivation motivation={motivation} setMotivation={setMotivation} onNext={handleNext} />}
                 {step === 10 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
                 {step === 11 && <StepAiAnalysis data={signupData} onNext={handleNext} />}
@@ -396,20 +398,36 @@ function StepChooseGoals({ chosenGoals, setChosenGoals, onNext }: { chosenGoals:
     )
 }
 
-function StepTriggers({ triggers, setTriggers, onNext }: { triggers: string, setTriggers: (t: string) => void, onNext: () => void }) {
+function StepTriggers({ category, triggers, setTriggers, onNext }: { category: AddictionCategory | null, triggers: string[], setTriggers: (t: string[]) => void, onNext: () => void }) {
+    const triggerOptions = category ? failureReasons[category] : [];
+
+    const handleTriggerToggle = (trigger: string) => {
+        setTriggers(prev =>
+            prev.includes(trigger) ? prev.filter(t => t !== trigger) : [...prev, trigger]
+        );
+    }
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onNext();
+        if (triggers.length > 0) onNext();
     }
+
     return (
         <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
-             <Textarea
-                id="triggers"
-                placeholder="e.g., stress, boredom, loneliness..."
-                value={triggers}
-                onChange={(e) => setTriggers(e.target.value)}
-                className="bg-secondary/50 rounded-2xl border-border focus:border-primary max-w-xs min-h-[150px] text-base p-4"
-            />
+            <div className="w-full max-w-md space-y-3">
+                {triggerOptions.map((option, index) => (
+                     <Card key={index} className="bg-secondary/50 border-border has-[:checked]:border-primary transition-colors duration-200 rounded-full">
+                        <Label className="flex items-center p-4 gap-4 cursor-pointer">
+                            <Checkbox 
+                                id={`trigger-${index}`}
+                                checked={triggers.includes(option)}
+                                onCheckedChange={() => handleTriggerToggle(option)}
+                            />
+                            <h3 className="font-semibold text-lg text-foreground">{option}</h3>
+                        </Label>
+                    </Card>
+                ))}
+            </div>
             <Button type="submit" size="lg" className="w-full max-w-xs rounded-full">
                 Continue
             </Button>
@@ -592,3 +610,5 @@ function StepCredentials({ onNext }: { onNext: () => void }) {
       </form>
   );
 }
+
+    
