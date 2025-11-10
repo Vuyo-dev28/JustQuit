@@ -27,13 +27,15 @@ const AnalyzeUserProblemsOutputSchema = z.object({
 });
 export type AnalyzeUserProblemsOutput = z.infer<typeof AnalyzeUserProblemsOutputSchema>;
 
+const fallbackAnalysis: AnalyzeUserProblemsOutput = {
+    summary: "Welcome! Taking the first step is the most important part of any journey. We're here to support you as you define your path to a healthier life.",
+    stats: "Every journey is unique, and you're in the right place to start yours. Many people have walked this path before, and you can too."
+};
+
 export async function analyzeUserProblems(input: AnalyzeUserProblemsInput): Promise<AnalyzeUserProblemsOutput> {
     // Ensure at least one piece of data is present to avoid empty prompts
     if (Object.values(input).every(val => !val || (Array.isArray(val) && val.length === 0))) {
-        return {
-            summary: "Welcome! Taking the first step is the most important part of any journey. We're here to support you as you define your path to a healthier life.",
-            stats: "Every journey is unique, and you're in the right place to start yours. Many people have walked this path before, and you can too."
-        };
+        return fallbackAnalysis;
     }
   return analyzeUserProblemsFlow(input);
 }
@@ -84,12 +86,18 @@ const analyzeUserProblemsFlow = ai.defineFlow(
     outputSchema: AnalyzeUserProblemsOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
-    if (!output) {
-      throw new Error("The AI model did not return a valid analysis.");
+    try {
+        const { output } = await prompt(input);
+        if (!output) {
+          console.error("The AI model did not return a valid analysis.");
+          return fallbackAnalysis;
+        }
+        return output;
+    } catch (e: any) {
+        console.error("AI analysis flow failed, returning fallback.", e.message);
+        // If the model is overloaded or fails for any reason, return a default analysis
+        // to avoid blocking the user signup flow.
+        return fallbackAnalysis;
     }
-    return output;
   }
 );
-
-    
