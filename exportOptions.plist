@@ -12,7 +12,7 @@
         <string>Your Ad Hoc Provisioning Profile Name</string>
     </dict>
     <key>signingCertificate</key>
-    <string>Your Apple Distribution Certificate Name</string>
+    <string>Apple Distribution</string>
     <key>signingStyle</key>
     <string>manual</string>
     <key>stripSwiftSymbols</key>
