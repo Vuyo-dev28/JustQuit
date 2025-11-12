@@ -37,34 +37,31 @@ jobs:
           cd ios/App
           pod install --repo-update
 
-      - name: Build iOS IPA
+      - name: Build iOS App Bundle
         run: |
           cd ios/App
-          rm -rf build Payload
-          
           xcodebuild -workspace App.xcworkspace \
             -scheme App \
             -configuration Release \
             -destination 'generic/platform=iOS' \
-            -archivePath ./build/App.xcarchive \
-            DEVELOPMENT_TEAM="YOUR_TEAM_ID" \
-            archive
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
 
-          xcodebuild -exportArchive \
-            -archivePath ./build/App.xcarchive \
-            -exportPath ./build \
-            -exportOptionsPlist ../../exportOptions.plist
-
-          mv ./build/App.ipa ./build/justquit.ipa
-          
-          echo "✅ IPA created successfully!"
-          ls -la build/
+      - name: Package IPA
+        run: |
+          cd ios/App
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/App.app Payload/
+          zip -qr justquit.ipa Payload
+          rm -rf Payload
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: justquit-ios-ipa
-          path: ios/App/build/justquit.ipa
+          path: ios/App/justquit.ipa
           retention-days: 7
 
       - name: Build summary
@@ -72,4 +69,4 @@ jobs:
           echo "🎉 iOS build completed!"
           echo "📱 App: justquit"
           echo "📦 Download the IPA from Artifacts section"
-          echo "🔧 Use Sideloadly to install on iOS devices"
+          echo "🔧 Use Sideloadly or a similar tool to install on iOS devices"
