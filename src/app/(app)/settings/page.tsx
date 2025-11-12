@@ -1,7 +1,8 @@
 
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,7 +12,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
-import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,53 +28,165 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { supabase } from "@/lib/supabase/client";
+import type { Profile } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SettingsPage() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isSavingGoal, setIsSavingGoal] = useState(false);
+  const [isSavingPledge, setIsSavingPledge] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const [name, setName] = useState("");
   const [goal, setGoal] = useState(90);
   const [newGoal, setNewGoal] = useState(goal);
   const [pledge, setPledge] = useState("");
   const [profilePic, setProfilePic] = useState<string | null>(null);
-  const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const storedName = localStorage.getItem("userName");
-    const storedPledge = localStorage.getItem("userPledge");
-    const storedGoal = localStorage.getItem("userGoal");
-    const storedProfilePic = localStorage.getItem("userProfilePic");
+    let isMounted = true;
 
-    if (storedName) setName(storedName);
-    if (storedPledge) setPledge(storedPledge);
-    if (storedGoal) {
-      const numGoal = parseInt(storedGoal, 10);
-      setGoal(numGoal);
-      setNewGoal(numGoal);
-    }
-    if (storedProfilePic) setProfilePic(storedProfilePic);
-  }, []);
+    const loadProfile = async () => {
+      setIsLoading(true);
 
-  const handleSaveProfile = () => {
-    localStorage.setItem("userName", name);
-    if (profilePic) {
-      localStorage.setItem("userProfilePic", profilePic);
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (!isMounted) {
+        return;
+      }
+
+      if (userError || !user) {
+        router.replace("/login");
+        return;
+      }
+
+      setUserId(user.id);
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (!isMounted) {
+        return;
+      }
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Unable to load profile",
+          description: error.message,
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      const profile = data as Profile | null;
+
+      if (profile) {
+        setName(profile.display_name ?? "");
+        setPledge(profile.pledge ?? "");
+        const goalDays = profile.goal_days ?? 90;
+        setGoal(goalDays);
+        setNewGoal(goalDays);
+        setProfilePic(profile.profile_image_url);
+      }
+
+      setIsLoading(false);
+    };
+
+    void loadProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [router, toast]);
+
+  const handleSaveProfile = async () => {
+    if (!userId) {
+      toast({
+        variant: "destructive",
+        title: "No active session",
+        description: "Please sign in again to update your profile.",
+      });
+      return;
     }
-    toast({
-      title: "Profile Updated!",
-      description: "Your information has been saved.",
-    });
+
+    setIsSavingProfile(true);
+
+    const trimmedName = name.trim();
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        display_name: trimmedName ? trimmedName : null,
+        profile_image_url: profilePic ?? null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", userId);
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Profile update failed",
+        description: error.message,
+      });
+    } else {
+      toast({
+        title: "Profile Updated!",
+        description: "Your information has been saved.",
+      });
+    }
+
+    setIsSavingProfile(false);
   };
 
-  const handleSaveGoal = () => {
-    setGoal(newGoal);
-    localStorage.setItem("userGoal", newGoal.toString());
-    toast({
-      title: "Goal Updated!",
-      description: `Your new goal is to reach ${newGoal} days.`,
-    });
+  const handleSaveGoal = async () => {
+    if (!userId) {
+      toast({
+        variant: "destructive",
+        title: "No active session",
+        description: "Please sign in again to update your goal.",
+      });
+      return;
+    }
+
+    setIsSavingGoal(true);
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        goal_days: newGoal,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", userId);
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Goal update failed",
+        description: error.message,
+      });
+    } else {
+      setGoal(newGoal);
+      toast({
+        title: "Goal Updated!",
+        description: `Your new goal is to reach ${newGoal} days.`,
+      });
+    }
+
+    setIsSavingGoal(false);
   };
 
-  const handleSavePledge = () => {
+  const handleSavePledge = async () => {
     if (!pledge.trim()) {
       toast({
         variant: "destructive",
@@ -83,39 +195,100 @@ export default function SettingsPage() {
       });
       return;
     }
-    localStorage.setItem("userPledge", pledge);
-    toast({
-      title: "Pledge Saved!",
-      description: "Your personal commitment has been recorded.",
-    });
+
+    if (!userId) {
+      toast({
+        variant: "destructive",
+        title: "No active session",
+        description: "Please sign in again to update your pledge.",
+      });
+      return;
+    }
+
+    setIsSavingPledge(true);
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        pledge: pledge.trim(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", userId);
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Pledge update failed",
+        description: error.message,
+      });
+    } else {
+      toast({
+        title: "Pledge Saved!",
+        description: "Your personal commitment has been recorded.",
+      });
+    }
+
+    setIsSavingPledge(false);
   };
 
-  const handleResetProgress = () => {
-    localStorage.removeItem("userName");
-    localStorage.removeItem("userPledge");
-    localStorage.removeItem("userGoal");
-    localStorage.removeItem("userProfilePic");
-    localStorage.removeItem("slipUpCount");
-    localStorage.removeItem("currentStreak");
-    localStorage.removeItem("longestStreak");
-    localStorage.removeItem("lastLogDate");
-    
-    toast({
-      variant: "destructive",
-      title: "Progress Reset",
-      description: "Your data has been cleared. It's a fresh start!",
-    });
-    
-    // Reset state to default
-    setName("");
-    setPledge("");
-    setGoal(90);
-    setNewGoal(90);
-    setProfilePic(null);
+  const handleResetProgress = async () => {
+    if (!userId) {
+      toast({
+        variant: "destructive",
+        title: "No active session",
+        description: "Please sign in again to reset your progress.",
+      });
+      return;
+    }
 
-    // Consider redirecting or reloading the app state
-    // For now, this just clears local and component state.
-     setTimeout(() => window.location.reload(), 1000);
+    setIsResetting(true);
+
+    const { error: logsError } = await supabase
+      .from("daily_logs")
+      .delete()
+      .eq("user_id", userId);
+
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .update({
+        display_name: null,
+        profile_image_url: null,
+        pledge: null,
+        goal_days: 90,
+        current_streak: 0,
+        longest_streak: 0,
+        slip_up_count: 0,
+        last_log_date: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", userId);
+
+    if (logsError || profileError) {
+      toast({
+        variant: "destructive",
+        title: "Reset failed",
+        description: logsError?.message ?? profileError?.message ?? "Please try again later.",
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Progress Reset",
+        description: "Your data has been cleared. It's a fresh start!",
+      });
+
+      setName("");
+      setPledge("");
+      setGoal(90);
+      setNewGoal(90);
+      setProfilePic(null);
+    }
+
+    setIsResetting(false);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.replace("/login");
   };
 
 
@@ -129,6 +302,14 @@ export default function SettingsPage() {
       reader.readAsDataURL(file);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center p-4">
+        <span className="text-muted-foreground">Loading settings...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
@@ -178,7 +359,9 @@ export default function SettingsPage() {
               />
             </div>
           </div>
-          <Button onClick={handleSaveProfile}>Save Profile</Button>
+          <Button onClick={handleSaveProfile} disabled={isSavingProfile}>
+            {isSavingProfile ? "Saving..." : "Save Profile"}
+          </Button>
         </CardContent>
       </Card>
 
@@ -204,8 +387,11 @@ export default function SettingsPage() {
               onValueChange={(value) => setNewGoal(value[0])}
             />
           </div>
-          <Button onClick={handleSaveGoal} disabled={goal === newGoal}>
-            Save Changes
+          <Button
+            onClick={handleSaveGoal}
+            disabled={goal === newGoal || isSavingGoal}
+          >
+            {isSavingGoal ? "Saving..." : "Save Changes"}
           </Button>
         </CardContent>
       </Card>
@@ -224,7 +410,9 @@ export default function SettingsPage() {
             onChange={(e) => setPledge(e.target.value)}
             rows={4}
           />
-          <Button onClick={handleSavePledge}>Save Pledge</Button>
+          <Button onClick={handleSavePledge} disabled={isSavingPledge}>
+            {isSavingPledge ? "Saving..." : "Save Pledge"}
+          </Button>
         </CardContent>
       </Card>
 
@@ -236,10 +424,17 @@ export default function SettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button variant="outline">Log Out</Button>
+          <Button variant="outline" onClick={() => void handleLogout()}>
+            Log Out
+          </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive">Reset All Progress</Button>
+              <Button
+                variant="destructive"
+                disabled={isResetting}
+              >
+                {isResetting ? "Resetting..." : "Reset All Progress"}
+              </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -250,8 +445,11 @@ export default function SettingsPage() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleResetProgress}>
-                  Yes, reset my progress
+                <AlertDialogAction
+                  onClick={() => void handleResetProgress()}
+                  disabled={isResetting}
+                >
+                  {isResetting ? "Resetting..." : "Yes, reset my progress"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

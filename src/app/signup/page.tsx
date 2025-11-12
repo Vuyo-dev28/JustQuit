@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SignatureCanvas from "react-signature-canvas";
@@ -14,21 +14,21 @@ import {
   YAxis,
 } from "recharts";
 import {
-  ArrowLeft,
-  CigaretteOff,
-  EyeOff,
-  Wine,
-  Heart,
-  Zap,
-  Smile,
-  DollarSign,
-  Users,
-  Leaf,
-  BrainCircuit,
-  Paintbrush,
-  BedDouble,
-  Sparkles,
   Activity,
+  ArrowLeft,
+  BedDouble,
+  BrainCircuit,
+  CigaretteOff,
+  DollarSign,
+  EyeOff,
+  Heart,
+  Leaf,
+  Paintbrush,
+  Smile,
+  Sparkles,
+  Users,
+  Wine,
+  Zap,
 } from "lucide-react";
 
 import type { AddictionCategory, Category } from "@/lib/types";
@@ -52,6 +52,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { analyzeUserProblems, type AnalyzeUserProblemsOutput } from "@/ai/flows/analyze-user-problems";
 import { Skeleton } from "@/components/ui/skeleton";
 import { failureReasons } from "@/lib/data";
+import { supabase } from "@/lib/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 
 const categories: Category[] = [
@@ -105,26 +107,15 @@ export default function SignupPage() {
   const [triggers, setTriggers] = useState<string[]>([]);
   const [motivation, setMotivation] = useState("");
   const [goal, setGoal] = useState(90);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
   const router = useRouter();
 
   const handleNext = () => {
     if (step < totalSteps) {
       setStep(step + 1);
-    } else {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem("userName", name);
-        localStorage.setItem("userGender", gender);
-        localStorage.setItem("userGoal", goal.toString());
-        localStorage.setItem("userAge", age);
-        localStorage.setItem("userSocial", socialPlatform);
-        localStorage.setItem("userGoals", JSON.stringify(chosenGoals));
-        localStorage.setItem("userTriggers", JSON.stringify(triggers));
-        localStorage.setItem("userMotivation", motivation);
-        if (selectedCategory) {
-          localStorage.setItem("addictionCategory", selectedCategory);
-        }
-      }
-      router.push("/dashboard");
     }
   };
 
@@ -160,6 +151,170 @@ export default function SignupPage() {
       triggers,
       motivation,
       goals: chosenGoals
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const redirectIfAuthenticated = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!isMounted) {
+        return;
+      }
+
+      if (session) {
+        router.replace("/dashboard");
+      }
+    };
+
+    void redirectIfAuthenticated();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
+
+  const handleCompleteSignup = async () => {
+    if (!email || !password) {
+      toast({
+        variant: "destructive",
+        title: "Missing credentials",
+        description: "Please provide an email and password to continue.",
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        variant: "destructive",
+        title: "Password too short",
+        description: "Please choose a password with at least 6 characters.",
+      });
+      return;
+    }
+
+    if (!selectedCategory) {
+      toast({
+        variant: "destructive",
+        title: "Select a focus area",
+        description: "Please choose what you want to work on before signing up.",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          display_name: name || undefined,
+        },
+      },
+    });
+
+    if (signUpError || !signUpData.user) {
+      toast({
+        variant: "destructive",
+        title: "Sign up failed",
+        description: signUpError?.message ?? "We couldn't create your account right now.",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    let user = signUpData.user;
+
+    if (!signUpData.session) {
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        toast({
+          variant: "destructive",
+          title: "Sign in required",
+          description:
+            signInError.message ||
+            "Please confirm your email and sign in to continue.",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      const {
+        data: { user: sessionUser },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !sessionUser) {
+        toast({
+          variant: "destructive",
+          title: "Session unavailable",
+          description: userError?.message ?? "Please try signing in again.",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
+      user = sessionUser;
+    }
+
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Unable to continue",
+        description: "We could not verify your session. Please try again.",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    const userId = user.id;
+
+    const { error: profileError } = await supabase.from("profiles").upsert({
+      id: userId,
+      email,
+      display_name: name || null,
+      addiction_category: selectedCategory,
+      gender: gender || null,
+      age_range: age || null,
+      social_platform: socialPlatform || null,
+      goals: chosenGoals.length ? chosenGoals : null,
+      triggers: triggers.length ? triggers : null,
+      motivation: motivation || null,
+      goal_days: goal,
+      pledge: null,
+      profile_image_url: null,
+      current_streak: 0,
+      longest_streak: 0,
+      slip_up_count: 0,
+      last_log_date: null,
+      updated_at: new Date().toISOString(),
+    });
+
+    if (profileError) {
+      toast({
+        variant: "destructive",
+        title: "Profile setup failed",
+        description: profileError.message,
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    toast({
+      title: "Account created",
+      description: "Welcome to Just Quit! Let's get started.",
+    });
+
+    setIsSubmitting(false);
+    router.replace("/dashboard");
   };
 
   return (
@@ -206,7 +361,16 @@ export default function SignupPage() {
                 {step === 10 && <StepAiAnalysis data={signupData} onNext={handleNext} />}
                 {step === 11 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
                 {step === 12 && <StepSignature onNext={handleNext} />}
-                {step === 13 && <StepCredentials onNext={handleNext} />}
+                {step === 13 && (
+                  <StepCredentials
+                    email={email}
+                    password={password}
+                    setEmail={setEmail}
+                    setPassword={setPassword}
+                    isSubmitting={isSubmitting}
+                    onComplete={handleCompleteSignup}
+                  />
+                )}
             </div>
 
              <div className="text-center text-sm text-muted-foreground">
@@ -374,7 +538,15 @@ const goalOptions = [
     { id: 'longevity', label: 'Live Longer', icon: Activity },
 ]
 
-function StepChooseGoals({ chosenGoals, setChosenGoals, onNext }: { chosenGoals: string[], setChosenGoals: (goals: string[]) => void, onNext: () => void }) {
+function StepChooseGoals({
+  chosenGoals,
+  setChosenGoals,
+  onNext,
+}: {
+  chosenGoals: string[];
+  setChosenGoals: React.Dispatch<React.SetStateAction<string[]>>;
+  onNext: () => void;
+}) {
     const handleGoalToggle = (goalId: string) => {
         setChosenGoals(prev => 
             prev.includes(goalId) ? prev.filter(g => g !== goalId) : [...prev, goalId]
@@ -410,7 +582,17 @@ function StepChooseGoals({ chosenGoals, setChosenGoals, onNext }: { chosenGoals:
     )
 }
 
-function StepTriggers({ category, triggers, setTriggers, onNext }: { category: AddictionCategory | null, triggers: string[], setTriggers: (t: string[]) => void, onNext: () => void }) {
+function StepTriggers({
+  category,
+  triggers,
+  setTriggers,
+  onNext,
+}: {
+  category: AddictionCategory | null;
+  triggers: string[];
+  setTriggers: React.Dispatch<React.SetStateAction<string[]>>;
+  onNext: () => void;
+}) {
     const triggerOptions = category ? failureReasons[category] : [];
 
     const handleTriggerToggle = (trigger: string) => {
@@ -662,23 +844,55 @@ function StepSignature({ onNext }: { onNext: () => void }) {
 }
 
 
-function StepCredentials({ onNext }: { onNext: () => void }) {
+function StepCredentials({
+  email,
+  password,
+  setEmail,
+  setPassword,
+  isSubmitting,
+  onComplete,
+}: {
+  email: string;
+  password: string;
+  setEmail: (value: string) => void;
+  setPassword: (value: string) => void;
+  isSubmitting: boolean;
+  onComplete: () => void;
+}) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onNext();
+        onComplete();
     }
   return (
     <form onSubmit={handleSubmit} className="space-y-4 animate-in fade-in-0 duration-500 flex flex-col items-center">
         <div className="grid gap-2 text-left w-full max-w-xs">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="you@example.com" className="h-12 bg-secondary/50 rounded-lg border-border focus:border-primary"/>
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              className="h-12 bg-secondary/50 rounded-lg border-border focus:border-primary"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              autoComplete="email"
+              required
+            />
         </div>
         <div className="grid gap-2 text-left w-full max-w-xs">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" placeholder="••••••••" className="h-12 bg-secondary/50 rounded-lg border-border focus:border-primary" />
+            <Input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              className="h-12 bg-secondary/50 rounded-lg border-border focus:border-primary"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete="new-password"
+              required
+            />
         </div>
-         <Button type="submit" size="lg" className="w-full max-w-xs rounded-full">
-          Complete Sign Up
+         <Button type="submit" size="lg" className="w-full max-w-xs rounded-full" disabled={isSubmitting}>
+          {isSubmitting ? "Creating account..." : "Complete Sign Up"}
         </Button>
       </form>
   );

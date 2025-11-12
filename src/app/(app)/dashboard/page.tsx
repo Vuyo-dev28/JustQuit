@@ -1,7 +1,8 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Bar,
   BarChart,
@@ -43,29 +44,22 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import type { AddictionCategory } from "@/lib/types";
+import type { AddictionCategory, DailyLog, Profile } from "@/lib/types";
 import { failureReasons } from "@/lib/data";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/lib/supabase/client";
+import {
+  addDays,
+  format,
+  isSameDay,
+  isWithinInterval,
+  startOfDay,
+  subDays,
+  subWeeks,
+} from "date-fns";
 
-
-const weeklyChartData = [
-  { day: "Mon", days: 1 },
-  { day: "Tue", days: 2 },
-  { day: "Wed", days: 3 },
-  { day: "Thu", days: 2 },
-  { day: "Fri", days: 3 },
-  { day: "Sat", days: 4 },
-  { day: "Sun", days: 5 },
-];
-
-const monthlyChartData = [
-  { week: "Week 1", days: 5 },
-  { week: "Week 2", days: 6 },
-  { week: "Week 3", days: 4 },
-  { week: "Week 4", days: 7 },
-];
 
 const chartConfig = {
   days: {
@@ -74,8 +68,60 @@ const chartConfig = {
   },
 };
 
+const buildWeeklyChartData = (logs: DailyLog[]) => {
+  const today = startOfDay(new Date());
+  const points: Array<{ day: string; days: number }> = [];
+
+  for (let offset = 6; offset >= 0; offset -= 1) {
+    const date = subDays(today, offset);
+    const successes = logs.filter((log) => {
+      const logDate = startOfDay(new Date(log.logged_date));
+      return log.success && isSameDay(logDate, date);
+    }).length;
+
+    points.push({
+      day: format(date, "EEE"),
+      days: successes,
+    });
+  }
+
+  return points;
+};
+
+const buildMonthlyChartData = (logs: DailyLog[]) => {
+  const today = startOfDay(new Date());
+  const points: Array<{ week: string; days: number }> = [];
+
+  for (let weekIndex = 3; weekIndex >= 0; weekIndex -= 1) {
+    const weekStart = startOfDay(subWeeks(today, weekIndex));
+    const weekEnd = addDays(weekStart, 6);
+
+    const successes = logs.filter((log) => {
+      const logDate = startOfDay(new Date(log.logged_date));
+      return (
+        log.success &&
+        isWithinInterval(logDate, {
+          start: weekStart,
+          end: weekEnd,
+        })
+      );
+    }).length;
+
+    points.push({
+      week: `Week ${4 - weekIndex}`,
+      days: successes,
+    });
+  }
+
+  return points;
+};
+
 export default function DashboardPage() {
+  const router = useRouter();
   const { toast } = useToast();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLogging, setIsLogging] = useState(false);
   const [lastLogDate, setLastLogDate] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [name, setName] = useState('');
@@ -88,66 +134,216 @@ export default function DashboardPage() {
   const [currentStreak, setCurrentStreak] = useState(0);
   const [longestStreak, setLongestStreak] = useState(0);
   const [showSlipUpDialog, setShowSlipUpDialog] = useState(false);
+  const [weeklyChartData, setWeeklyChartData] = useState(
+    buildWeeklyChartData([])
+  );
+  const [monthlyChartData, setMonthlyChartData] = useState(
+    buildMonthlyChartData([])
+  );
 
+  const loadLogsForUser = useCallback(async (uid: string) => {
+    const { data, error } = await supabase
+      .from("daily_logs")
+      .select("id, user_id, logged_date, success, note, created_at")
+      .eq("user_id", uid)
+      .order("logged_date", { ascending: true });
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Unable to load progress history",
+        description: error.message,
+      });
+      return;
+    }
+
+    const logs = (data ?? []) as DailyLog[];
+    setWeeklyChartData(buildWeeklyChartData(logs));
+    setMonthlyChartData(buildMonthlyChartData(logs));
+  }, [toast]);
 
   useEffect(() => {
-    const storedName = localStorage.getItem("userName");
-    const storedCategory = localStorage.getItem("addictionCategory") as AddictionCategory | null;
-    const storedSlipUps = localStorage.getItem("slipUpCount");
-    const storedProfilePic = localStorage.getItem("userProfilePic");
-    const storedPledge = localStorage.getItem("userPledge");
-    const storedGoal = localStorage.getItem("userGoal");
-    const storedStreak = localStorage.getItem("currentStreak");
-    const storedLongestStreak = localStorage.getItem("longestStreak");
-    const storedLastLogDate = localStorage.getItem("lastLogDate");
+    let isMounted = true;
 
-    if (storedName) setName(storedName);
-    if (storedCategory && failureReasons[storedCategory]) {
-      setCategory(storedCategory);
-      setReasons(failureReasons[storedCategory]);
-    }
-    if (storedSlipUps) setSlipUpCount(parseInt(storedSlipUps, 10));
-    if (storedProfilePic) setProfilePic(storedProfilePic);
-    if (storedPledge) setPledge(storedPledge);
-    if (storedGoal) setGoal(parseInt(storedGoal, 10));
-    if (storedStreak) setCurrentStreak(parseInt(storedStreak, 10));
-    if (storedLongestStreak) setLongestStreak(parseInt(storedLongestStreak, 10));
-    if (storedLastLogDate) setLastLogDate(storedLastLogDate);
+    const loadData = async () => {
+      setIsLoading(true);
 
-  }, []);
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-  const handleLogProgress = (success: boolean) => {
-    const today = new Date().toDateString();
-    
-    if (success) {
-      const newStreak = currentStreak + 1;
-      setCurrentStreak(newStreak);
-      localStorage.setItem("currentStreak", newStreak.toString());
-
-      if (newStreak > longestStreak) {
-          setLongestStreak(newStreak);
-          localStorage.setItem("longestStreak", newStreak.toString());
+      if (!isMounted) {
+        return;
       }
 
-      setShowConfetti(true);
+      if (userError || !user) {
+        router.replace("/login");
+        return;
+      }
+
+      setUserId(user.id);
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (!isMounted) {
+        return;
+      }
+
+      if (error) {
+        toast({
+          variant: "destructive",
+          title: "Unable to load profile",
+          description: error.message,
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      const profile = data as Profile | null;
+
+      if (profile) {
+        setName(profile.display_name ?? "");
+        const profileCategory = profile.addiction_category as AddictionCategory | null;
+        setCategory(profileCategory);
+        setReasons(profileCategory ? failureReasons[profileCategory] ?? [] : []);
+        setSlipUpCount(profile.slip_up_count ?? 0);
+        setProfilePic(profile.profile_image_url);
+        setPledge(profile.pledge ?? "");
+        setGoal(profile.goal_days ?? 90);
+        setCurrentStreak(profile.current_streak ?? 0);
+        setLongestStreak(profile.longest_streak ?? 0);
+        setLastLogDate(profile.last_log_date);
+      }
+
+      await loadLogsForUser(user.id);
+
+      if (isMounted) {
+        setIsLoading(false);
+      }
+    };
+
+    void loadData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [loadLogsForUser, router, toast]);
+
+  const hasLoggedToday = lastLogDate
+    ? isSameDay(
+        startOfDay(new Date(lastLogDate)),
+        startOfDay(new Date())
+      )
+    : false;
+
+  const handleLogProgress = async (success: boolean) => {
+    if (!userId) {
       toast({
-        title: "You did it! 🎉",
-        description: "Another day, another victory. Keep up the amazing work!",
+        variant: "destructive",
+        title: "No active session",
+        description: "Please sign in again to track your progress.",
       });
-    } else {
-      const newSlipUpCount = slipUpCount + 1;
-      setSlipUpCount(newSlipUpCount);
-      localStorage.setItem("slipUpCount", newSlipUpCount.toString());
-      setCurrentStreak(0);
-      localStorage.setItem("currentStreak", "0");
-      setShowSlipUpDialog(true);
+      return;
     }
-    
-    setLastLogDate(today);
-    localStorage.setItem("lastLogDate", today);
+
+    setIsLogging(true);
+
+    const now = new Date();
+    const todayStart = startOfDay(now);
+    const todayIsoDate = format(todayStart, "yyyy-MM-dd");
+    const alreadyLoggedToday = lastLogDate
+      ? isSameDay(startOfDay(new Date(lastLogDate)), todayStart)
+      : false;
+
+    let newCurrentStreak = currentStreak;
+    let newLongestStreak = longestStreak;
+    let newSlipUpCount = slipUpCount;
+
+    if (success) {
+      if (!alreadyLoggedToday) {
+        newCurrentStreak = currentStreak + 1;
+        if (newCurrentStreak > longestStreak) {
+          newLongestStreak = newCurrentStreak;
+        }
+      }
+    } else {
+      newCurrentStreak = 0;
+      newSlipUpCount = slipUpCount + 1;
+    }
+
+    try {
+      const { error: logError } = await supabase
+        .from("daily_logs")
+        .upsert(
+          {
+            user_id: userId,
+            logged_date: todayIsoDate,
+            success,
+          },
+          { onConflict: "user_id,logged_date" }
+        );
+
+      if (logError) {
+        throw logError;
+      }
+
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          current_streak: newCurrentStreak,
+          longest_streak: newLongestStreak,
+          slip_up_count: newSlipUpCount,
+          last_log_date: todayIsoDate,
+          updated_at: now.toISOString(),
+        })
+        .eq("id", userId);
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      setCurrentStreak(newCurrentStreak);
+      setLongestStreak(newLongestStreak);
+      setSlipUpCount(newSlipUpCount);
+      setLastLogDate(todayIsoDate);
+
+      await loadLogsForUser(userId);
+
+      if (success) {
+        setShowConfetti(true);
+        toast({
+          title: "You did it! 🎉",
+          description: "Another day, another victory. Keep up the amazing work!",
+        });
+        setShowSlipUpDialog(false);
+      } else {
+        setShowSlipUpDialog(true);
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Please try again later.";
+      toast({
+        variant: "destructive",
+        title: "Unable to log progress",
+        description: message,
+      });
+    } finally {
+      setIsLogging(false);
+    }
   };
-  
-  const hasLoggedToday = lastLogDate === new Date().toDateString();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center p-4">
+        <span className="text-muted-foreground">Loading your dashboard...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
@@ -198,9 +394,13 @@ export default function DashboardPage() {
             </p>
             <Sheet>
               <SheetTrigger asChild>
-                <Button size="sm" className="w-full" disabled={hasLoggedToday}>
+                <Button size="sm" className="w-full" disabled={hasLoggedToday || isLogging}>
                   {hasLoggedToday ? <Check className="mr-2"/> : <Plus className="mr-2" />}
-                  {hasLoggedToday ? 'Logged for Today' : 'Log Today\'s Progress'}
+                  {hasLoggedToday
+                    ? "Logged for Today"
+                    : isLogging
+                      ? "Logging..."
+                      : "Log Today's Progress"}
                 </Button>
               </SheetTrigger>
               <SheetContent side="bottom" className="rounded-t-lg">
@@ -212,12 +412,21 @@ export default function DashboardPage() {
                 </SheetHeader>
                 <div className="grid gap-4 py-8">
                   <SheetClose asChild>
-                    <Button size="lg" onClick={() => handleLogProgress(true)}>
+                    <Button
+                      size="lg"
+                      onClick={() => handleLogProgress(true)}
+                      disabled={isLogging}
+                    >
                       Yes, I did!
                     </Button>
                   </SheetClose>
                   <SheetClose asChild>
-                    <Button size="lg" variant="destructive" onClick={() => handleLogProgress(false)}>
+                    <Button
+                      size="lg"
+                      variant="destructive"
+                      onClick={() => handleLogProgress(false)}
+                      disabled={isLogging}
+                    >
                       No, I slipped up
                     </Button>
                   </SheetClose>
@@ -408,4 +617,4 @@ export default function DashboardPage() {
     </div>
   );
 
-    
+}

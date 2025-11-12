@@ -12,24 +12,84 @@ import {
 import { milestones } from "@/lib/milestones";
 import MilestoneBadge from "@/components/shared/MilestoneBadge";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase/client";
+import type { Profile } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ProgressPage() {
-    const [currentStreak, setCurrentStreak] = useState(5); // Default to a value that shows some progress
+    const router = useRouter();
+    const { toast } = useToast();
+    const [currentStreak, setCurrentStreak] = useState(0);
     const [goal, setGoal] = useState(90);
     const [pledge, setPledge] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // In a real app, this would come from a database or localStorage.
-        const fakeStreak = 5; 
-        setCurrentStreak(fakeStreak);
+        let isMounted = true;
 
-        const storedGoal = localStorage.getItem('userGoal');
-        if (storedGoal) setGoal(parseInt(storedGoal, 10));
+        const loadProgress = async () => {
+            setIsLoading(true);
 
-        const storedPledge = localStorage.getItem('userPledge');
-        if (storedPledge) setPledge(storedPledge);
+            const {
+                data: { user },
+                error: userError,
+            } = await supabase.auth.getUser();
 
-    }, []);
+            if (!isMounted) {
+                return;
+            }
+
+            if (userError || !user) {
+                router.replace("/login");
+                return;
+            }
+
+            const { data, error } = await supabase
+                .from("profiles")
+                .select("current_streak, goal_days, pledge")
+                .eq("id", user.id)
+                .single();
+
+            if (!isMounted) {
+                return;
+            }
+
+            if (error) {
+                toast({
+                    variant: "destructive",
+                    title: "Unable to load progress",
+                    description: error.message,
+                });
+                setIsLoading(false);
+                return;
+            }
+
+            const profile = data as Partial<Profile> | null;
+
+            if (profile) {
+                setCurrentStreak(profile.current_streak ?? 0);
+                setGoal(profile.goal_days ?? 90);
+                setPledge(profile.pledge ?? "");
+            }
+
+            setIsLoading(false);
+        };
+
+        void loadProgress();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [router, toast]);
+
+    if (isLoading) {
+        return (
+            <div className="flex h-full items-center justify-center p-4">
+                <span className="text-muted-foreground">Loading progress...</span>
+            </div>
+        );
+    }
 
   return (
     <div className="p-4 space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
