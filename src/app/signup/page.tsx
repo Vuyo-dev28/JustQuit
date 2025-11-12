@@ -77,7 +77,7 @@ const categories: Category[] = [
   },
 ];
 
-const totalSteps = 13;
+const totalSteps = 12;
 
 const questions = [
     { id: 'welcome', title: "Let's Get Started", description: "Take the first step towards a healthier, happier you. Let's triumph over vice together." },
@@ -89,7 +89,7 @@ const questions = [
     { id: 'goals', title: 'Question #6', description: 'What are your primary goals?'},
     { id: 'triggers', title: 'Question #7', description: 'What are your relapse triggers?'},
     { id: 'motivation', title: 'Question #8', description: 'Why do you want to be free?'},
-    { id: 'analysis', title: 'Your Personal Analysis', description: 'Based on your answers, here is a starting point for your journey.' },
+    // { id: 'analysis', title: 'Your Personal Analysis', description: 'Based on your answers, here is a starting point for your journey.' },
     { id: 'goal', title: 'Question #9', description: 'What is your initial goal?' },
     { id: 'pledge', title: 'Sign your commitment', description: 'Promise yourself that you will never do it again.' },
     { id: 'credentials', title: 'Create your account', description: 'Almost there! Secure your journey.' },
@@ -133,7 +133,7 @@ export default function SignupPage() {
   const currentQuestion = questions[step - 1];
 
   const getDynamicDescription = () => {
-    if (step === 12 && selectedCategory) {
+    if (step === 11 && selectedCategory) { // Adjusted step from 12 to 11
       const categoryTextMap = {
         Porn: 'watch porn',
         Alcohol: 'drink alcohol',
@@ -358,10 +358,10 @@ export default function SignupPage() {
                 {step === 7 && <StepChooseGoals chosenGoals={chosenGoals} setChosenGoals={setChosenGoals} onNext={handleNext} />}
                 {step === 8 && <StepTriggers category={selectedCategory} triggers={triggers} setTriggers={setTriggers} onNext={handleNext} />}
                 {step === 9 && <StepMotivation motivation={motivation} setMotivation={setMotivation} onNext={handleNext} />}
-                {step === 10 && <StepAiAnalysis data={signupData} onNext={handleNext} />}
-                {step === 11 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
-                {step === 12 && <StepSignature onNext={handleNext} />}
-                {step === 13 && (
+                {/* {step === 10 && <StepAiAnalysis data={signupData} onNext={handleNext} />} */}
+                {step === 10 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
+                {step === 11 && <StepSignature onNext={handleNext} />}
+                {step === 12 && (
                   <StepCredentials
                     email={email}
                     password={password}
@@ -802,7 +802,7 @@ function StepAiAnalysis({ data, onNext }: { data: any, onNext: () => void }) {
 
 
              <Button onClick={onNext} size="lg" className="w-full max-w-xs rounded-full">
-                Continue to Final Step
+                Continue
             </Button>
         </div>
     );
@@ -897,6 +897,8 @@ function StepCredentials({
       </form>
   );
 }
+
+    
 
     
 
