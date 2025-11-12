@@ -23,8 +23,8 @@ jobs:
 
       - name: Build Next.js app
         env:
-          NEXT_PUBLIC_SUPABASE_URL: "https://placeholder.supabase.co"
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: "placeholder-key"
+          NEXT_PUBLIC_SUPABASE_URL: "https://olshypvwcqtqxbgkzpzp.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9sc2h5cHZ3Y3F0cXhiZ2t6cHpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0MzcwNzQsImV4cCI6MjA3ODAxMzA3NH0.aUBczZeRPJJYTo1MgH8RkyRLpggznxENJFcOwEQcal4"
         run: |
           npm run build
 
@@ -47,6 +47,7 @@ jobs:
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -archivePath ./build/App.xcarchive \
+            DEVELOPMENT_TEAM="YOUR_TEAM_ID" \
             archive
 
           xcodebuild -exportArchive \
