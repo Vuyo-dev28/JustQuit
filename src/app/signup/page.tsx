@@ -49,7 +49,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { analyzeUserProblems, type AnalyzeUserProblemsOutput } from "@/ai/flows/analyze-user-problems";
 import { Skeleton } from "@/components/ui/skeleton";
 import { failureReasons } from "@/lib/data";
 import { supabase } from "@/lib/supabase/client";
@@ -77,7 +76,7 @@ const categories: Category[] = [
   },
 ];
 
-const totalSteps = 12;
+const totalSteps = 11;
 
 const questions = [
     { id: 'welcome', title: "Let's Get Started", description: "Take the first step towards a healthier, happier you. Let's triumph over vice together." },
@@ -89,7 +88,6 @@ const questions = [
     { id: 'goals', title: 'Question #6', description: 'What are your primary goals?'},
     { id: 'triggers', title: 'Question #7', description: 'What are your relapse triggers?'},
     { id: 'motivation', title: 'Question #8', description: 'Why do you want to be free?'},
-    // { id: 'analysis', title: 'Your Personal Analysis', description: 'Based on your answers, here is a starting point for your journey.' },
     { id: 'goal', title: 'Question #9', description: 'What is your initial goal?' },
     { id: 'pledge', title: 'Sign your commitment', description: 'Promise yourself that you will never do it again.' },
     { id: 'credentials', title: 'Create your account', description: 'Almost there! Secure your journey.' },
@@ -133,7 +131,7 @@ export default function SignupPage() {
   const currentQuestion = questions[step - 1];
 
   const getDynamicDescription = () => {
-    if (step === 11 && selectedCategory) { // Adjusted step from 12 to 11
+    if (step === 10 && selectedCategory) { // Adjusted step for signature
       const categoryTextMap = {
         Porn: 'watch porn',
         Alcohol: 'drink alcohol',
@@ -334,7 +332,7 @@ export default function SignupPage() {
                 <div className="w-full mx-8">
                     <Progress value={(step / totalSteps) * 100} className="h-2" />
                 </div>
-                 {step === totalSteps || step === 10 ? <div className="w-9 h-9"/> : (
+                 {step === totalSteps ? <div className="w-9 h-9"/> : (
                      <Button variant="link" onClick={handleNext} className="text-muted-foreground p-0 h-9 w-9 text-sm">
                         Skip
                     </Button>
@@ -358,19 +356,8 @@ export default function SignupPage() {
                 {step === 7 && <StepChooseGoals chosenGoals={chosenGoals} setChosenGoals={setChosenGoals} onNext={handleNext} />}
                 {step === 8 && <StepTriggers category={selectedCategory} triggers={triggers} setTriggers={setTriggers} onNext={handleNext} />}
                 {step === 9 && <StepMotivation motivation={motivation} setMotivation={setMotivation} onNext={handleNext} />}
-                {/* {step === 10 && <StepAiAnalysis data={signupData} onNext={handleNext} />} */}
                 {step === 10 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
-                {step === 11 && <StepSignature onNext={handleNext} />}
-                {step === 12 && (
-                  <StepCredentials
-                    email={email}
-                    password={password}
-                    setEmail={setEmail}
-                    setPassword={setPassword}
-                    isSubmitting={isSubmitting}
-                    onComplete={handleCompleteSignup}
-                  />
-                )}
+                {step === 11 && <StepSignature onNext={handleCompleteSignup} />}
             </div>
 
              <div className="text-center text-sm text-muted-foreground">
@@ -704,110 +691,6 @@ const chartConfig = {
 };
 
 
-function StepAiAnalysis({ data, onNext }: { data: any, onNext: () => void }) {
-    const [analysis, setAnalysis] = useState<AnalyzeUserProblemsOutput | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const getAnalysis = async () => {
-            try {
-                setIsLoading(true);
-                const result = await analyzeUserProblems(data);
-                setAnalysis(result);
-            } catch (error) {
-                console.error("Error fetching AI analysis:", error);
-                // Fallback content in case of error
-                setAnalysis({
-                    summary: "We couldn't generate your analysis right now, but that's okay. The most important thing is that you're here and ready to start.",
-                    stats: "Many people face similar challenges, and taking this first step is a sign of great strength."
-                });
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        getAnalysis();
-    }, [data]);
-
-    return (
-        <div className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center text-left">
-            <Card className="w-full max-w-md bg-secondary/30">
-                <CardContent className="p-6 space-y-4">
-                    {isLoading ? (
-                        <>
-                            <Skeleton className="h-4 w-3/4" />
-                            <Skeleton className="h-4 w-full" />
-                            <Skeleton className="h-4 w-5/6" />
-                            <br/>
-                            <Skeleton className="h-4 w-full" />
-                             <Skeleton className="h-4 w-1/2" />
-                        </>
-                    ) : (
-                        <>
-                            <div>
-                                <h3 className="font-semibold mb-2 text-primary">Your Personal Snapshot</h3>
-                                <p className="text-foreground/90">{analysis?.summary}</p>
-                            </div>
-                            <div>
-                                <h3 className="font-semibold mb-2 text-primary">You're Not Alone</h3>
-                                <p className="text-foreground/90">{analysis?.stats}</p>
-                            </div>
-                        </>
-                    )}
-                </CardContent>
-            </Card>
-
-             <Card className="w-full max-w-md bg-secondary/30">
-                <CardHeader>
-                    <CardTitle className="text-lg">Context: Common Triggers</CardTitle>
-                    <CardDescription>
-                        This chart shows illustrative data on how common certain triggers are.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <ChartContainer config={chartConfig} className="h-48 w-full">
-                        <BarChart accessibilityLayer data={chartData} layout="vertical" margin={{ left: 10 }}>
-                             <defs>
-                                <linearGradient id="fillPrevalence" x1="0" y1="0" x2="1" y2="0">
-                                <stop
-                                    offset="5%"
-                                    stopColor="var(--color-prevalence)"
-                                    stopOpacity={0.8}
-                                />
-                                <stop
-                                    offset="95%"
-                                    stopColor="var(--color-prevalence)"
-                                    stopOpacity={0.1}
-                                />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid horizontal={false} />
-                            <YAxis 
-                                dataKey="trigger" 
-                                type="category" 
-                                tickLine={false} 
-                                axisLine={false}
-                                tick={{ fill: 'hsl(var(--foreground))', fontSize: 12 }}
-                            />
-                            <XAxis type="number" hide={true} />
-                            <ChartTooltip
-                                cursor={false}
-                                content={<ChartTooltipContent indicator="dot" />}
-                            />
-                            <Bar dataKey="prevalence" fill="url(#fillPrevalence)" radius={5} />
-                        </BarChart>
-                    </ChartContainer>
-                </CardContent>
-            </Card>
-
-
-             <Button onClick={onNext} size="lg" className="w-full max-w-xs rounded-full">
-                Continue
-            </Button>
-        </div>
-    );
-}
-
 function StepSignature({ onNext }: { onNext: () => void }) {
   const sigCanvas = useRef<SignatureCanvas | null>(null);
 
@@ -837,67 +720,11 @@ function StepSignature({ onNext }: { onNext: () => void }) {
       </div>
 
       <Button type="submit" size="lg" className="w-full max-w-xs rounded-full !mt-8">
-        Finish
+        Finish and Create Account
       </Button>
     </form>
   );
 }
-
-
-function StepCredentials({
-  email,
-  password,
-  setEmail,
-  setPassword,
-  isSubmitting,
-  onComplete,
-}: {
-  email: string;
-  password: string;
-  setEmail: (value: string) => void;
-  setPassword: (value: string) => void;
-  isSubmitting: boolean;
-  onComplete: () => void;
-}) {
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        onComplete();
-    }
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4 animate-in fade-in-0 duration-500 flex flex-col items-center">
-        <div className="grid gap-2 text-left w-full max-w-xs">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              className="h-12 bg-secondary/50 rounded-lg border-border focus:border-primary"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              autoComplete="email"
-              required
-            />
-        </div>
-        <div className="grid gap-2 text-left w-full max-w-xs">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              className="h-12 bg-secondary/50 rounded-lg border-border focus:border-primary"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              autoComplete="new-password"
-              required
-            />
-        </div>
-         <Button type="submit" size="lg" className="w-full max-w-xs rounded-full" disabled={isSubmitting}>
-          {isSubmitting ? "Creating account..." : "Complete Sign Up"}
-        </Button>
-      </form>
-  );
-}
-
     
 
     
