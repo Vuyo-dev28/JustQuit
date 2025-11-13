@@ -86,3 +86,10 @@ export interface DailyMotivation {
     quote: string;
     author: string;
 }
+
+export interface FeatureRequest {
+  id: string;
+  user_id: string;
+  request: string;
+  created_at: string;
+}
