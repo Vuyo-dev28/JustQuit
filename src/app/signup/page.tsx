@@ -416,16 +416,16 @@ function StepConsequences({ category, onNext }: { category: AddictionCategory | 
                 <CarouselContent>
                     {consequences.map((item, index) => (
                         <CarouselItem key={index}>
-                            <Card className="bg-secondary/30 h-48 flex flex-col justify-center">
-                                <CardHeader className="flex flex-col items-center text-center gap-4 space-y-0 p-4">
+                            <Card className="bg-card border-border/80 shadow-sm h-52 flex flex-col justify-center items-center text-center">
+                                <CardHeader className="p-4 flex flex-col items-center gap-3">
                                     <div className="p-3 bg-primary/10 text-primary rounded-lg border border-primary/20">
                                         <item.icon className="h-6 w-6" />
                                     </div>
-                                    <div>
-                                        <CardTitle className="text-base font-semibold">{item.title}</CardTitle>
-                                        <CardDescription className="text-xs mt-1">{item.description}</CardDescription>
-                                    </div>
+                                    <CardTitle className="text-base font-semibold">{item.title}</CardTitle>
                                 </CardHeader>
+                                <CardContent className="p-4 pt-0">
+                                    <CardDescription className="text-xs">{item.description}</CardDescription>
+                                </CardContent>
                             </Card>
                         </CarouselItem>
                     ))}
@@ -939,3 +939,4 @@ function StepCredentials({
     
 
     
+
