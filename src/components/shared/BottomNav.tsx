@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookHeart, Unlink2, MessageSquare, Settings, TrendingUp, Gem } from "lucide-react";
+import { BookHeart, Link as LinkIcon, MessageSquare, Settings, TrendingUp, Gem } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -40,7 +40,7 @@ export default function BottomNav() {
                pathname.startsWith("/dashboard") ? "scale-110" : "scale-100"
             )}>
               <div className="absolute inset-0 bg-primary/20 opacity-50 rounded-full animate-pulse"></div>
-              <Unlink2 className="h-8 w-8 z-10" />
+              <LinkIcon className="h-8 w-8 z-10" />
             </div>
           </Link>
         </div>
