@@ -23,6 +23,7 @@ export interface Profile {
   goal_days: number;
   pledge: string | null;
   profile_image_url: string | null;
+  push_token: string | null;
   current_streak: number;
   longest_streak: number;
   slip_up_count: number;

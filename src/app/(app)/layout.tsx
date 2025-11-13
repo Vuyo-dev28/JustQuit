@@ -4,11 +4,16 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { Capacitor } from '@capacitor/core';
+import { PushNotifications } from '@capacitor/push-notifications';
+
 
 import BottomNav from "@/components/shared/BottomNav";
 import { supabase } from "@/lib/supabase/client";
 import SplashScreen from "@/components/shared/SplashScreen";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+
 
 export default function AppLayout({
   children,
@@ -16,11 +21,69 @@ export default function AppLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const { toast } = useToast();
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const isFirstRender = useRef(true);
+
+   const registerForPushNotifications = async (userId: string) => {
+    if (!Capacitor.isNativePlatform()) {
+      console.log('Push notifications are not available in the browser.');
+      return;
+    }
+  
+    try {
+      let permStatus = await PushNotifications.checkPermissions();
+  
+      if (permStatus.receive === 'prompt') {
+        permStatus = await PushNotifications.requestPermissions();
+      }
+  
+      if (permStatus.receive !== 'granted') {
+        throw new Error('User denied permissions!');
+      }
+  
+      await PushNotifications.register();
+  
+      PushNotifications.addListener('pushRegistration', async (token) => {
+        console.log('Push registration success, token:', token.value);
+        
+        const { error } = await supabase
+          .from('profiles')
+          .update({ push_token: token.value })
+          .eq('id', userId);
+  
+        if (error) {
+          console.error('Failed to save push token:', error.message);
+          toast({
+            variant: "destructive",
+            title: "Could Not Save Notification Token",
+            description: "You may not receive push notifications.",
+          });
+        }
+      });
+  
+      PushNotifications.addListener('pushRegistrationError', (error) => {
+        console.error('Error on registration: ' + JSON.stringify(error));
+        toast({
+            variant: "destructive",
+            title: "Notification Registration Failed",
+            description: "There was an issue setting up push notifications.",
+        });
+      });
+  
+    } catch (e: any) {
+      console.error("Push notification setup failed", e);
+      toast({
+            variant: "destructive",
+            title: "Push Notifications Unavailable",
+            description: e.message || "Could not initialize push notifications.",
+      });
+    }
+  };
+
 
   useEffect(() => {
     let isMounted = true;
@@ -39,6 +102,8 @@ export default function AppLayout({
         router.replace("/login");
         return;
       }
+      
+      await registerForPushNotifications(session.user.id);
 
       setIsLoading(false);
       setTimeout(() => {
