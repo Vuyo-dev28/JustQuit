@@ -93,3 +93,10 @@ export interface FeatureRequest {
   request: string;
   created_at: string;
 }
+
+export interface InAppMessage {
+  id: string;
+  title: string;
+  message: string;
+  created_at: string;
+}

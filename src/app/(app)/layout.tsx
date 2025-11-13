@@ -24,6 +24,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import FeatureRequestButton from "@/components/shared/FeatureRequestButton";
+import InAppMessageListener from "@/components/shared/InAppMessageListener";
 
 
 export default function AppLayout({
@@ -165,7 +166,7 @@ export default function AppLayout({
       isMounted = false;
       authListener?.subscription.unsubscribe();
     };
-  }, [router]);
+  }, [router, toast]);
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -197,6 +198,7 @@ export default function AppLayout({
       <main className="flex-1 overflow-y-auto pb-28">{children}</main>
       <BottomNav />
       <FeatureRequestButton />
+      <InAppMessageListener />
 
 
       <AlertDialog open={showMotivation} onOpenChange={setShowMotivation}>
