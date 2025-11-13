@@ -149,7 +149,7 @@ export default function AppLayout({
       setIsLoading(false);
       setTimeout(() => {
         if(isMounted) setShowSplash(false);
-      }, 2000); // Show splash for 2 seconds
+      }, 4000); // Show splash for 4 seconds
     };
 
     void init();
