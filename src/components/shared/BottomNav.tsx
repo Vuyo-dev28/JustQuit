@@ -1,11 +1,11 @@
 
-"use client";
+'use client';
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BookHeart, Link as LinkIcon, MessageSquare, Settings, TrendingUp, Gem } from "lucide-react";
-
 import { cn } from "@/lib/utils";
+import { useEffect, useRef, useState } from "react";
 
 const navItems = [
   { href: "/progress", label: "Progress", icon: TrendingUp },
@@ -17,6 +17,62 @@ const navItems = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const [indicatorStyle, setIndicatorStyle] = useState({});
+  const navRef = useRef<HTMLDivElement>(null);
+  const itemsRef = useRef<Map<string, HTMLAnchorElement | null>>(new Map());
+
+  useEffect(() => {
+    const updateIndicator = () => {
+        if (!navRef.current) return;
+
+        const activeItem = navItems.find(item => pathname.startsWith(item.href));
+        const activeElement = activeItem ? itemsRef.current.get(activeItem.href) : null;
+        
+        if (activeElement) {
+            const navRect = navRef.current.getBoundingClientRect();
+            const { offsetLeft, offsetWidth } = activeElement;
+            setIndicatorStyle({
+                left: `${offsetLeft}px`,
+                width: `${offsetWidth}px`,
+            });
+        }
+    };
+
+    updateIndicator();
+    window.addEventListener('resize', updateIndicator);
+
+    const observer = new MutationObserver(updateIndicator);
+    if(navRef.current) {
+        observer.observe(navRef.current, { childList: true, subtree: true });
+    }
+
+    return () => {
+        window.removeEventListener('resize', updateIndicator);
+        observer.disconnect();
+    };
+}, [pathname]);
+
+  const handleMouseEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!navRef.current) return;
+    const { offsetLeft, offsetWidth } = e.currentTarget;
+    setIndicatorStyle({
+        left: `${offsetLeft}px`,
+        width: `${offsetWidth}px`,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    const activeItem = navItems.find(item => pathname.startsWith(item.href));
+    const activeElement = activeItem ? itemsRef.current.get(activeItem.href) : null;
+    if (activeElement) {
+        const { offsetLeft, offsetWidth } = activeElement;
+        setIndicatorStyle({
+            left: `${offsetLeft}px`,
+            width: `${offsetWidth}px`,
+        });
+    }
+  };
+
 
   const leftNavItems = navItems.slice(0, 2);
   const rightNavItems = navItems.slice(3);
@@ -46,8 +102,16 @@ export default function BottomNav() {
         </div>
 
         {/* Arched Background */}
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-card border-t border-border/80 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
-          <div className="flex justify-between items-center h-full max-w-md mx-auto px-2">
+        <div 
+          ref={navRef}
+          onMouseLeave={handleMouseLeave}
+          className="absolute bottom-0 left-0 right-0 h-16 bg-card border-t border-border/80 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]"
+        >
+          <div className="relative flex justify-between items-center h-full max-w-md mx-auto px-2">
+             <div 
+                className="absolute top-0 h-full bg-primary/10 rounded-md transition-all duration-300 ease-in-out"
+                style={indicatorStyle}
+             />
             {/* Left side */}
             <div className="flex justify-around items-center w-2/5">
               {leftNavItems.map((item) => {
@@ -56,8 +120,10 @@ export default function BottomNav() {
                   <Link
                     key={item.href}
                     href={item.href}
+                    ref={el => itemsRef.current.set(item.href, el)}
+                    onMouseEnter={handleMouseEnter}
                     className={cn(
-                      "flex flex-col items-center justify-center text-muted-foreground w-1/2 transition-colors duration-200",
+                      "relative z-10 flex flex-col items-center justify-center text-muted-foreground w-1/2 py-2 transition-colors duration-200",
                       isActive && "text-primary"
                     )}
                   >
@@ -73,8 +139,10 @@ export default function BottomNav() {
                  <Link
                     key={premiumItem.href}
                     href={premiumItem.href}
+                    ref={el => itemsRef.current.set(premiumItem.href, el)}
+                    onMouseEnter={handleMouseEnter}
                     className={cn(
-                      "flex flex-col items-center justify-center text-muted-foreground transition-colors duration-200",
+                      "relative z-10 flex flex-col items-center justify-center text-muted-foreground transition-colors duration-200",
                       pathname.startsWith(premiumItem.href) && "text-primary"
                     )}
                   >
@@ -90,8 +158,10 @@ export default function BottomNav() {
                   <Link
                     key={item.href}
                     href={item.href}
+                    ref={el => itemsRef.current.set(item.href, el)}
+                    onMouseEnter={handleMouseEnter}
                     className={cn(
-                      "flex flex-col items-center justify-center text-muted-foreground w-1/2 transition-colors duration-200",
+                      "relative z-10 flex flex-col items-center justify-center text-muted-foreground w-1/2 py-2 transition-colors duration-200",
                       isActive && "text-primary"
                     )}
                   >
