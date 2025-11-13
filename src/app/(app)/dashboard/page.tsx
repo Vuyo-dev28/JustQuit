@@ -118,7 +118,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [userId, setUserId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(isLoading);
+  const [isLoading, setIsLoading] = useState(true);
   const [isLogging, setIsLogging] = useState(false);
   const [lastLogDate, setLastLogDate] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -616,3 +616,5 @@ export default function DashboardPage() {
   );
 
 }
+
+    
