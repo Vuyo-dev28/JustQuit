@@ -21,6 +21,9 @@ import {
   Users,
   Wine,
   Zap,
+  TrendingDown,
+  HeartCrack,
+  Clock,
 } from "lucide-react";
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer } from "recharts";
 
@@ -42,6 +45,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { failureReasons } from "@/lib/data";
+import { addictionConsequences } from "@/lib/consequences";
 import { supabase } from "@/lib/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { analyzeUserProblems, AnalyzeUserProblemsInput, AnalyzeUserProblemsOutput } from "@/ai/flows/analyze-user-problems";
@@ -69,11 +73,12 @@ const categories: Category[] = [
   },
 ];
 
-const totalSteps = 13;
+const totalSteps = 14;
 
 const questions = [
     { id: 'welcome', title: "Let's Get Started", description: "Take the first step towards a healthier, happier you. Let's triumph over vice together." },
     { id: 'category', title: 'Question #1', description: 'What are we tackling?' },
+    { id: 'consequences', title: 'Facing the Facts', description: "Understanding the 'why' is a powerful tool for change. Here are common impacts." },
     { id: 'name', title: 'Question #2', description: 'What should we call you?' },
     { id: 'gender', title: 'Question #3', description: 'What is your gender?' },
     { id: 'age', title: 'Question #4', description: 'How old are you?' },
@@ -125,7 +130,7 @@ export default function SignupPage() {
   const currentQuestion = questions[step - 1];
 
   const getDynamicDescription = () => {
-    if (step === 12 && selectedCategory) { 
+    if (step === 13 && selectedCategory) { 
       const categoryTextMap = {
         Porn: 'watch porn',
         Alcohol: 'drink alcohol',
@@ -343,17 +348,18 @@ export default function SignupPage() {
             <div className="min-h-[300px]">
                 {step === 1 && <Step1 onNext={handleNext} />}
                 {step === 2 && <Step2 onSelect={handleCategorySelect} />}
-                {step === 3 && <StepName name={name} setName={setName} onNext={handleNext} />}
-                {step === 4 && <StepGender gender={gender} setGender={setGender} onNext={handleNext} />}
-                {step === 5 && <StepAge age={age} setAge={setAge} onNext={handleNext} />}
-                {step === 6 && <StepSocial socialPlatform={socialPlatform} setSocialPlatform={setSocialPlatform} onNext={handleNext} />}
-                {step === 7 && <StepChooseGoals chosenGoals={chosenGoals} setChosenGoals={setChosenGoals} onNext={handleNext} />}
-                {step === 8 && <StepTriggers category={selectedCategory} triggers={triggers} setTriggers={setTriggers} onNext={handleNext} />}
-                {step === 9 && <StepMotivation motivation={motivation} setMotivation={setMotivation} onNext={handleNext} />}
-                {step === 10 && <StepAiAnalysis input={signupData} onNext={handleNext} />}
-                {step === 11 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
-                {step === 12 && <StepSignature onNext={handleNext} />}
-                {step === 13 && <StepCredentials email={email} setEmail={setEmail} password={password} setPassword={setPassword} onComplete={handleCompleteSignup} isSubmitting={isSubmitting} />}
+                {step === 3 && <StepConsequences category={selectedCategory} onNext={handleNext} />}
+                {step === 4 && <StepName name={name} setName={setName} onNext={handleNext} />}
+                {step === 5 && <StepGender gender={gender} setGender={setGender} onNext={handleNext} />}
+                {step === 6 && <StepAge age={age} setAge={setAge} onNext={handleNext} />}
+                {step === 7 && <StepSocial socialPlatform={socialPlatform} setSocialPlatform={setSocialPlatform} onNext={handleNext} />}
+                {step === 8 && <StepChooseGoals chosenGoals={chosenGoals} setChosenGoals={setChosenGoals} onNext={handleNext} />}
+                {step === 9 && <StepTriggers category={selectedCategory} triggers={triggers} setTriggers={setTriggers} onNext={handleNext} />}
+                {step === 10 && <StepMotivation motivation={motivation} setMotivation={setMotivation} onNext={handleNext} />}
+                {step === 11 && <StepAiAnalysis input={signupData} onNext={handleNext} />}
+                {step === 12 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
+                {step === 13 && <StepSignature onNext={handleNext} />}
+                {step === 14 && <StepCredentials email={email} setEmail={setEmail} password={password} setPassword={setPassword} onComplete={handleCompleteSignup} isSubmitting={isSubmitting} />}
             </div>
 
              <div className="text-center text-sm text-muted-foreground">
@@ -398,6 +404,33 @@ function Step2({ onSelect }: { onSelect: (category: AddictionCategory) => void }
       ))}
     </div>
   );
+}
+
+function StepConsequences({ category, onNext }: { category: AddictionCategory | null; onNext: () => void }) {
+    const consequences = category ? addictionConsequences[category] : [];
+
+    return (
+        <div className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+            <div className="w-full max-w-md grid grid-cols-1 gap-3">
+                {consequences.map((item, index) => (
+                    <Card key={index} className="bg-secondary/30">
+                        <CardHeader className="flex flex-row items-center gap-4 space-y-0 p-4">
+                            <div className="p-3 bg-primary/10 text-primary rounded-lg border border-primary/20">
+                                <item.icon className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-base font-semibold">{item.title}</CardTitle>
+                                <CardDescription className="text-xs">{item.description}</CardDescription>
+                            </div>
+                        </CardHeader>
+                    </Card>
+                ))}
+            </div>
+            <Button onClick={onNext} size="lg" className="w-full max-w-xs rounded-full">
+                I Understand
+            </Button>
+        </div>
+    );
 }
 
 function StepName({ name, setName, onNext }: { name: string; setName: (n: string) => void; onNext: () => void }) {
@@ -893,5 +926,7 @@ function StepCredentials({
     </form>
   );
 }
+
+    
 
     
