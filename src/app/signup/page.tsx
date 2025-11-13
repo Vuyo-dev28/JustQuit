@@ -749,66 +749,86 @@ function StepAiAnalysis({ input, onNext }: { input: AnalyzeUserProblemsInput; on
     void getAnalysis();
   }, [input, toast]);
 
-  return (
-    <div className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
-      <Card className="w-full max-w-md bg-secondary/30">
-        <CardHeader>
-          <CardTitle className="text-base font-semibold">Your Path Forward</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {isLoading ? (
-            <>
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-4/5" />
-              <div className="flex gap-4 pt-4">
-                <Skeleton className="h-24 w-24 rounded-full" />
-                <div className="flex-1 space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
+  const renderLoading = () => (
+    <div className="space-y-6">
+        <Card className="w-full max-w-md bg-secondary/30">
+            <CardHeader>
+                <Skeleton className="h-5 w-3/4" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-4/5" />
+            </CardContent>
+        </Card>
+        <div className="grid grid-cols-2 gap-4">
+            <Card className="bg-secondary/30">
+                <CardContent className="p-4 flex flex-col items-center justify-center text-center h-32">
+                    <Skeleton className="h-8 w-1/2 mb-2" />
                     <Skeleton className="h-4 w-3/4" />
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="text-foreground/90 text-sm">{analysis?.summary}</p>
-              <div className="grid grid-cols-2 gap-4 pt-4">
-                <div className="flex flex-col items-center justify-center text-center p-4 rounded-lg bg-background/50">
+                </CardContent>
+            </Card>
+             <Card className="bg-secondary/30">
+                <CardContent className="p-4 flex items-center justify-center h-32">
+                    <Skeleton className="h-24 w-24 rounded-full" />
+                </CardContent>
+            </Card>
+        </div>
+    </div>
+  )
+
+  const renderContent = () => (
+      <div className="space-y-6">
+        <Card className="w-full max-w-md bg-secondary/30">
+            <CardHeader>
+            <CardTitle className="text-base font-semibold">Your Path Forward</CardTitle>
+            </CardHeader>
+            <CardContent>
+            <p className="text-foreground/90 text-sm">{analysis?.summary}</p>
+            </CardContent>
+        </Card>
+        <div className="grid grid-cols-2 gap-4">
+            <Card className="bg-secondary/30">
+                <CardContent className="p-4 flex flex-col items-center justify-center text-center h-32">
                     <h3 className="text-3xl font-bold text-primary">{analysis?.struggleStat}</h3>
-                    <p className="text-xs text-muted-foreground">face similar challenges</p>
-                </div>
-                <div className="flex flex-col items-center justify-center relative">
+                    <p className="text-xs text-muted-foreground mt-1">face similar challenges</p>
+                </CardContent>
+            </Card>
+            <Card className="bg-secondary/30">
+                 <CardContent className="p-4 flex flex-col items-center justify-center h-32 relative">
                     <ChartContainer
                         config={chartConfig}
-                        className="mx-auto aspect-square h-full w-full"
+                        className="mx-auto aspect-square h-full w-full max-h-[100px]"
                     >
                         <ResponsiveContainer>
                             <RadarChart
                                 data={[{ subject: 'Success', A: analysis?.successRate ?? 0, fullMark: 100 }]}
-                                margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
+                                margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                                innerRadius={25}
                             >
-                                <PolarGrid gridType="circle" />
-                                <PolarAngleAxis dataKey="subject" tick={false} />
+                                <PolarGrid gridType="circle" stroke="hsl(var(--border) / 0.5)" />
                                 <Radar
-                                name="Success Rate"
-                                dataKey="A"
-                                stroke="hsl(var(--primary))"
-                                fill="hsl(var(--primary))"
-                                fillOpacity={0.6}
+                                    name="Success Rate"
+                                    dataKey="A"
+                                    stroke="hsl(var(--primary))"
+                                    fill="hsl(var(--primary))"
+                                    fillOpacity={0.6}
                                 />
                             </RadarChart>
                         </ResponsiveContainer>
                     </ChartContainer>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <p className="text-3xl font-bold text-primary">{analysis?.successRate}%</p>
-                        <p className="text-xs text-muted-foreground">Success Rate</p>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <p className="text-2xl font-bold text-primary">{analysis?.successRate}%</p>
                     </div>
-                </div>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+                     <p className="text-xs text-muted-foreground mt-1">Success Rate</p>
+                </CardContent>
+            </Card>
+        </div>
+    </div>
+  )
+
+  return (
+    <div className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+      {isLoading ? renderLoading() : renderContent()}
       <Button onClick={onNext} size="lg" className="w-full max-w-xs rounded-full">
         Continue
       </Button>
@@ -873,3 +893,5 @@ function StepCredentials({
     </form>
   );
 }
+
+    
