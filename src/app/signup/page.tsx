@@ -21,9 +21,6 @@ import {
   Users,
   Wine,
   Zap,
-  TrendingDown,
-  HeartCrack,
-  Clock,
 } from "lucide-react";
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer } from "recharts";
 
@@ -78,17 +75,17 @@ const totalSteps = 14;
 
 const questions = [
     { id: 'welcome', title: "Let's Get Started", description: "Take the first step towards a healthier, happier you. Let's triumph over vice together." },
-    { id: 'category', title: 'Question #1', description: 'What are we tackling?' },
+    { id: 'category', title: 'What are we tackling?', description: 'Choose the area you want to focus on.' },
     { id: 'consequences', title: 'Facing the Facts', description: "Understanding the 'why' is a powerful tool for change. Here are common impacts." },
-    { id: 'name', title: 'Question #2', description: 'What should we call you?' },
-    { id: 'gender', title: 'Question #3', description: 'What is your gender?' },
-    { id: 'age', title: 'Question #4', description: 'How old are you?' },
-    { id: 'social', title: 'Question #5', description: 'Which social media platform do you use the most?'},
-    { id: 'goals', title: 'Question #6', description: 'What are your primary goals?'},
-    { id: 'triggers', title: 'Question #7', description: 'What are your relapse triggers?'},
-    { id: 'motivation', title: 'Question #8', description: 'Why do you want to be free?'},
+    { id: 'name', title: 'What should we call you?', description: "Let's get to know each other." },
+    { id: 'gender', title: 'What is your gender?', description: 'This helps us personalize your experience.' },
+    { id: 'age', title: 'How old are you?', description: 'This helps us provide relevant insights.' },
+    { id: 'social', title: 'Which social media do you use most?', description: 'Understanding your environment helps.'},
+    { id: 'goals', title: 'What are your primary goals?', description: 'Select all that apply.'},
+    { id: 'triggers', title: 'What are your relapse triggers?', description: 'Identifying them is the first step to managing them.'},
+    { id: 'motivation', title: 'Why do you want to be free?', description: 'Connect with your deepest reason.'},
     { id: 'analysis', title: 'A Quick Analysis', description: "Here's a little encouragement based on your answers." },
-    { id: 'goal', title: 'Question #9', description: 'What is your initial goal?' },
+    { id: 'goal', title: 'What is your initial goal?', description: 'Set a target to aim for.' },
     { id: 'pledge', title: 'Sign your commitment', description: 'Promise yourself that you will never do it again.' },
     { id: 'credentials', title: 'Create your account', description: 'Almost there! Secure your journey.' },
 ]
@@ -142,8 +139,8 @@ export default function SignupPage() {
     return currentQuestion.description;
   }
   
-  const signupData = {
-      category: selectedCategory,
+  const signupData: AnalyzeUserProblemsInput = {
+      category: selectedCategory ?? undefined,
       age,
       gender,
       triggers,
@@ -937,6 +934,3 @@ function StepCredentials({
 }
 
     
-
-    
-
