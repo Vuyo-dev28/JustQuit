@@ -6,13 +6,23 @@ import { usePathname, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
-
+import { format, isSameDay, startOfDay } from 'date-fns';
 
 import BottomNav from "@/components/shared/BottomNav";
 import { supabase } from "@/lib/supabase/client";
 import SplashScreen from "@/components/shared/SplashScreen";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import type { DailyMotivation } from "@/lib/types";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 
 export default function AppLayout({
@@ -27,6 +37,8 @@ export default function AppLayout({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const isFirstRender = useRef(true);
+  const [motivation, setMotivation] = useState<DailyMotivation | null>(null);
+  const [showMotivation, setShowMotivation] = useState(false);
 
    const registerForPushNotifications = async (userId: string) => {
     if (!Capacitor.isNativePlatform()) {
@@ -84,6 +96,26 @@ export default function AppLayout({
     }
   };
 
+  const fetchDailyMotivation = async () => {
+    try {
+        const { data, error } = await supabase
+            .rpc('get_random_motivation');
+
+        if (error) {
+            console.error("Error fetching motivation:", error.message);
+            return;
+        }
+
+        if (data && data.length > 0) {
+            setMotivation(data[0]);
+            setShowMotivation(true);
+            localStorage.setItem('lastMotivationDate', new Date().toISOString());
+        }
+    } catch (e: any) {
+        console.error("Failed to fetch daily motivation:", e.message);
+    }
+};
+
 
   useEffect(() => {
     let isMounted = true;
@@ -104,6 +136,13 @@ export default function AppLayout({
       }
       
       await registerForPushNotifications(session.user.id);
+      
+      const lastMotivationDateStr = localStorage.getItem('lastMotivationDate');
+      const today = startOfDay(new Date());
+
+      if (!lastMotivationDateStr || !isSameDay(startOfDay(new Date(lastMotivationDateStr)), today)) {
+          await fetchDailyMotivation();
+      }
 
       setIsLoading(false);
       setTimeout(() => {
@@ -156,6 +195,23 @@ export default function AppLayout({
 
       <main className="flex-1 overflow-y-auto pb-28">{children}</main>
       <BottomNav />
+
+      <AlertDialog open={showMotivation} onOpenChange={setShowMotivation}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>A Thought for Your Day</AlertDialogTitle>
+            <AlertDialogDescription className="text-foreground/90 text-lg py-4 italic">
+                "{motivation?.quote}"
+            </AlertDialogDescription>
+             <p className="text-right text-muted-foreground">- {motivation?.author || 'Anonymous'}</p>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowMotivation(false)}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div
         className={`pointer-events-none fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ${

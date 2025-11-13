@@ -80,3 +80,9 @@ export interface ForumReply {
     profile_image_url: string | null;
   } | null;
 }
+
+export interface DailyMotivation {
+    id: number;
+    quote: string;
+    author: string;
+}
