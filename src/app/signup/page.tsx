@@ -50,6 +50,7 @@ import { supabase } from "@/lib/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { analyzeUserProblems, AnalyzeUserProblemsInput, AnalyzeUserProblemsOutput } from "@/ai/flows/analyze-user-problems";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 
 const categories: Category[] = [
@@ -411,21 +412,27 @@ function StepConsequences({ category, onNext }: { category: AddictionCategory | 
 
     return (
         <div className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
-            <div className="w-full max-w-md grid grid-cols-1 gap-3">
-                {consequences.map((item, index) => (
-                    <Card key={index} className="bg-secondary/30">
-                        <CardHeader className="flex flex-row items-center gap-4 space-y-0 p-4">
-                            <div className="p-3 bg-primary/10 text-primary rounded-lg border border-primary/20">
-                                <item.icon className="h-6 w-6" />
-                            </div>
-                            <div>
-                                <CardTitle className="text-base font-semibold">{item.title}</CardTitle>
-                                <CardDescription className="text-xs">{item.description}</CardDescription>
-                            </div>
-                        </CardHeader>
-                    </Card>
-                ))}
-            </div>
+            <Carousel className="w-full max-w-xs">
+                <CarouselContent>
+                    {consequences.map((item, index) => (
+                        <CarouselItem key={index}>
+                            <Card className="bg-secondary/30 h-48 flex flex-col justify-center">
+                                <CardHeader className="flex flex-col items-center text-center gap-4 space-y-0 p-4">
+                                    <div className="p-3 bg-primary/10 text-primary rounded-lg border border-primary/20">
+                                        <item.icon className="h-6 w-6" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-base font-semibold">{item.title}</CardTitle>
+                                        <CardDescription className="text-xs mt-1">{item.description}</CardDescription>
+                                    </div>
+                                </CardHeader>
+                            </Card>
+                        </CarouselItem>
+                    ))}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+            </Carousel>
             <Button onClick={onNext} size="lg" className="w-full max-w-xs rounded-full">
                 I Understand
             </Button>
@@ -810,24 +817,25 @@ function StepAiAnalysis({ input, onNext }: { input: AnalyzeUserProblemsInput; on
   )
 
   const renderContent = () => (
-      <div className="space-y-6">
-        <Card className="w-full max-w-md bg-secondary/30">
+    <div className="space-y-4">
+        <Card className="w-full max-w-md bg-card border-border/80 shadow-sm">
             <CardHeader>
-            <CardTitle className="text-base font-semibold">Your Path Forward</CardTitle>
+                <CardTitle className="text-base font-semibold">Your Path Forward</CardTitle>
             </CardHeader>
             <CardContent>
-            <p className="text-foreground/90 text-sm">{analysis?.summary}</p>
+                <p className="text-sm text-foreground/80">{analysis?.summary}</p>
             </CardContent>
         </Card>
+
         <div className="grid grid-cols-2 gap-4">
-            <Card className="bg-secondary/30">
-                <CardContent className="p-4 flex flex-col items-center justify-center text-center h-32">
+            <Card className="bg-card border-border/80 shadow-sm">
+                <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
                     <h3 className="text-3xl font-bold text-primary">{analysis?.struggleStat}</h3>
                     <p className="text-xs text-muted-foreground mt-1">face similar challenges</p>
                 </CardContent>
             </Card>
-            <Card className="bg-secondary/30">
-                 <CardContent className="p-4 flex flex-col items-center justify-center h-32 relative">
+            <Card className="bg-card border-border/80 shadow-sm">
+                <CardContent className="p-4 flex flex-col items-center justify-center h-full relative">
                     <ChartContainer
                         config={chartConfig}
                         className="mx-auto aspect-square h-full w-full max-h-[100px]"
@@ -836,7 +844,8 @@ function StepAiAnalysis({ input, onNext }: { input: AnalyzeUserProblemsInput; on
                             <RadarChart
                                 data={[{ subject: 'Success', A: analysis?.successRate ?? 0, fullMark: 100 }]}
                                 margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-                                innerRadius={25}
+                                innerRadius="35%"
+                                outerRadius="100%"
                             >
                                 <PolarGrid gridType="circle" stroke="hsl(var(--border) / 0.5)" />
                                 <Radar
@@ -851,13 +860,13 @@ function StepAiAnalysis({ input, onNext }: { input: AnalyzeUserProblemsInput; on
                     </ChartContainer>
                     <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                         <p className="text-2xl font-bold text-primary">{analysis?.successRate}%</p>
+                        <p className="text-xs text-muted-foreground">Success Rate</p>
                     </div>
-                     <p className="text-xs text-muted-foreground mt-1">Success Rate</p>
                 </CardContent>
             </Card>
         </div>
     </div>
-  )
+)
 
   return (
     <div className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
