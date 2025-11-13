@@ -373,7 +373,7 @@ export default function SignupPage() {
 
 function Step1({ onNext }: { onNext: () => void }) {
   return (
-    <div className="flex flex-col justify-center items-center h-full animate-in fade-in-0 duration-500">
+    <div className="flex flex-col justify-center items-center h-full animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
       <Button onClick={onNext} size="lg" className="w-full max-w-xs rounded-full">
         Start Your Journey
       </Button>
@@ -383,7 +383,7 @@ function Step1({ onNext }: { onNext: () => void }) {
 
 function Step2({ onSelect }: { onSelect: (category: AddictionCategory) => void }) {
   return (
-    <div className="space-y-3 animate-in fade-in-0 duration-500">
+    <div className="space-y-3 animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
       {categories.map((category, index) => (
         <button
           key={category.id}
@@ -408,7 +408,7 @@ function StepConsequences({ category, onNext }: { category: AddictionCategory | 
     const consequences = category ? addictionConsequences[category] : [];
 
     return (
-        <div className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+        <div className="space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 flex flex-col items-center">
             <Carousel className="w-full max-w-xs">
                 <CarouselContent>
                     {consequences.map((item, index) => (
@@ -443,7 +443,7 @@ function StepName({ name, setName, onNext }: { name: string; setName: (n: string
         if (name.trim()) onNext();
     }
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 flex flex-col items-center">
              <Input 
                 id="name" 
                 type="text" 
@@ -471,7 +471,7 @@ function StepGender({ gender, setGender, onNext }: { gender: string, setGender: 
         if (gender) onNext();
     }
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 flex flex-col items-center">
             <RadioGroup value={gender} onValueChange={setGender} className="w-full max-w-xs space-y-3">
                 {genderOptions.map(option => (
                     <Card key={option.id} className="bg-secondary/50 border-border has-[:checked]:border-primary transition-colors duration-200 rounded-full">
@@ -496,7 +496,7 @@ function StepAge({ age, setAge, onNext }: { age: string; setAge: (a: string) => 
         if (age) onNext();
     }
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 flex flex-col items-center">
             <Select onValueChange={setAge} value={age}>
                 <SelectTrigger className="w-full max-w-xs h-14 text-center text-lg bg-secondary/50 rounded-full border-border focus:border-primary">
                     <SelectValue placeholder="Select your age range" />
@@ -523,7 +523,7 @@ function StepSocial({ socialPlatform, setSocialPlatform, onNext }: { socialPlatf
         if (socialPlatform) onNext();
     }
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 flex flex-col items-center">
             <Select onValueChange={setSocialPlatform} value={socialPlatform}>
                 <SelectTrigger className="w-full max-w-xs h-14 text-center text-lg bg-secondary/50 rounded-full border-border focus:border-primary">
                     <SelectValue placeholder="Select a platform" />
@@ -579,7 +579,7 @@ function StepChooseGoals({
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 flex flex-col items-center">
             <div className="w-full max-w-md grid grid-cols-1 md:grid-cols-2 gap-3">
                 {goalOptions.map(option => (
                     <Card key={option.id} className="bg-secondary/50 border-border has-[:checked]:border-primary transition-colors duration-200 rounded-2xl">
@@ -627,7 +627,7 @@ function StepTriggers({
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 flex flex-col items-center">
             <div className="w-full max-w-md space-y-3">
                 {triggerOptions.map((option, index) => (
                      <Card key={index} className="bg-secondary/50 border-border has-[:checked]:border-primary transition-colors duration-200 rounded-full">
@@ -663,7 +663,7 @@ function StepMotivation({ motivation, setMotivation, onNext }: { motivation: str
         if (motivation) onNext();
     }
     return (
-        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+        <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 flex flex-col items-center">
             <RadioGroup value={motivation} onValueChange={setMotivation} className="w-full max-w-xs space-y-3">
                 {motivationOptions.map(option => (
                     <Card key={option.id} className="bg-secondary/50 border-border has-[:checked]:border-primary transition-colors duration-200 rounded-full">
@@ -688,7 +688,7 @@ function StepGoal({ goal, setGoal, onNext }: { goal: number; setGoal: (g: number
         onNext();
     }
     return (
-        <form onSubmit={handleSubmit} className="space-y-8 animate-in fade-in-0 duration-500 flex flex-col items-center">
+        <form onSubmit={handleSubmit} className="space-y-8 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 flex flex-col items-center">
             <div className="text-center">
                 <p className="text-6xl font-bold font-headline">{goal}</p>
                 <p className="text-muted-foreground">days</p>
@@ -721,7 +721,7 @@ function StepSignature({ onNext }: { onNext: () => void }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 animate-in fade-in-0 duration-500 flex flex-col items-center">
+    <form onSubmit={handleSubmit} className="space-y-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 flex flex-col items-center">
       <div className="bg-card w-full max-w-sm h-48 rounded-lg border border-border">
          <SignatureCanvas
             ref={sigCanvas}
@@ -866,7 +866,7 @@ function StepAiAnalysis({ input, onNext }: { input: AnalyzeUserProblemsInput; on
 )
 
   return (
-    <div className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+    <div className="space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 flex flex-col items-center">
       {isLoading ? renderLoading() : renderContent()}
       <Button onClick={onNext} size="lg" className="w-full max-w-xs rounded-full">
         Continue
@@ -897,7 +897,7 @@ function StepCredentials({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+    <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 flex flex-col items-center">
       <div className="w-full max-w-xs space-y-4">
         <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -932,5 +932,7 @@ function StepCredentials({
     </form>
   );
 }
+
+    
 
     
