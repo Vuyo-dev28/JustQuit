@@ -23,6 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import FeatureRequestButton from "@/components/shared/FeatureRequestButton";
 
 
 export default function AppLayout({
@@ -195,6 +196,8 @@ export default function AppLayout({
 
       <main className="flex-1 overflow-y-auto pb-28">{children}</main>
       <BottomNav />
+      <FeatureRequestButton />
+
 
       <AlertDialog open={showMotivation} onOpenChange={setShowMotivation}>
         <AlertDialogContent>

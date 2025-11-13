@@ -42,12 +42,10 @@ export default function SettingsPage() {
   const [isSavingGoal, setIsSavingGoal] = useState(false);
   const [isSavingPledge, setIsSavingPledge] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
-  const [isSavingRequest, setIsSavingRequest] = useState(false);
   const [name, setName] = useState("");
   const [goal, setGoal] = useState(90);
   const [newGoal, setNewGoal] = useState(goal);
   const [pledge, setPledge] = useState("");
-  const [featureRequest, setFeatureRequest] = useState("");
   const [profilePic, setProfilePic] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -252,50 +250,6 @@ export default function SettingsPage() {
 
     setIsSavingPledge(false);
   };
-
-  const handleSaveFeatureRequest = async () => {
-    if (!featureRequest.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Feature request is empty",
-        description: "Please write something before submitting.",
-      });
-      return;
-    }
-  
-    if (!userId) {
-      toast({
-        variant: "destructive",
-        title: "No active session",
-        description: "Please sign in again to submit a request.",
-      });
-      return;
-    }
-  
-    setIsSavingRequest(true);
-  
-    const { error } = await supabase.from("feature_requests").insert({
-      user_id: userId,
-      request: featureRequest.trim(),
-    });
-  
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Submission failed",
-        description: error.message,
-      });
-    } else {
-      setFeatureRequest("");
-      toast({
-        title: "Request Sent!",
-        description: "Thank you for your feedback.",
-      });
-    }
-  
-    setIsSavingRequest(false);
-  };
-  
 
   const handleResetProgress = async () => {
     if (!userId) {
@@ -504,27 +458,6 @@ export default function SettingsPage() {
           </Button>
         </CardContent>
       </Card>
-      
-      <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-400 fill-mode-both">
-        <CardHeader>
-          <CardTitle>Request a Feature</CardTitle>
-          <CardDescription>
-            Have an idea to make JustQuit better? Let us know!
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Textarea
-            placeholder="I think it would be great if..."
-            value={featureRequest}
-            onChange={(e) => setFeatureRequest(e.target.value)}
-            rows={4}
-          />
-          <Button onClick={handleSaveFeatureRequest} disabled={isSavingRequest}>
-            {isSavingRequest ? "Sending..." : "Submit Request"}
-          </Button>
-        </CardContent>
-      </Card>
-
 
       <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-500 fill-mode-both">
         <CardHeader>
