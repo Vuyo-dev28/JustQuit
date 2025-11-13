@@ -22,6 +22,7 @@ import {
   Wine,
   Zap,
 } from "lucide-react";
+import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer } from "recharts";
 
 import type { AddictionCategory, Category } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ import { failureReasons } from "@/lib/data";
 import { supabase } from "@/lib/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { analyzeUserProblems, AnalyzeUserProblemsInput, AnalyzeUserProblemsOutput } from "@/ai/flows/analyze-user-problems";
+import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 
 
 const categories: Category[] = [
@@ -704,6 +706,14 @@ function StepSignature({ onNext }: { onNext: () => void }) {
   );
 }
 
+const chartConfig = {
+  success: {
+    label: "Success Rate",
+    color: "hsl(var(--primary))",
+  },
+} satisfies ChartConfig;
+
+
 function StepAiAnalysis({ input, onNext }: { input: AnalyzeUserProblemsInput; onNext: () => void }) {
   const [analysis, setAnalysis] = useState<AnalyzeUserProblemsOutput | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -712,7 +722,6 @@ function StepAiAnalysis({ input, onNext }: { input: AnalyzeUserProblemsInput; on
 
   useEffect(() => {
     const getAnalysis = async () => {
-      // Prevent running analysis multiple times
       if (analysisPerformed.current) return;
       analysisPerformed.current = true;
 
@@ -727,10 +736,10 @@ function StepAiAnalysis({ input, onNext }: { input: AnalyzeUserProblemsInput; on
           title: "Analysis Failed",
           description: "Could not get AI-powered feedback. Using default messages.",
         });
-        // Set a fallback analysis so the user isn't blocked
         setAnalysis({
             summary: "Taking this first step is a brave and powerful decision. You have a community here to support you on your journey to a healthier life.",
-            stats: "Many people share similar goals and face similar challenges. You are not alone, and every day is a new opportunity for success."
+            struggleStat: "Millions",
+            successRate: 80,
         });
       } finally {
         setIsLoading(false);
@@ -744,21 +753,58 @@ function StepAiAnalysis({ input, onNext }: { input: AnalyzeUserProblemsInput; on
     <div className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
       <Card className="w-full max-w-md bg-secondary/30">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">Your Path Forward</CardTitle>
+          <CardTitle className="text-base font-semibold">Your Path Forward</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {isLoading ? (
             <>
               <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-4/5" />
-              <Skeleton className="h-4 w-full mt-4" />
-              <Skeleton className="h-4 w-3/4" />
+              <div className="flex gap-4 pt-4">
+                <Skeleton className="h-24 w-24 rounded-full" />
+                <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                </div>
+              </div>
             </>
           ) : (
             <>
-              <p className="text-foreground/90">{analysis?.summary}</p>
-              <p className="text-primary italic font-medium">{analysis?.stats}</p>
+              <p className="text-foreground/90 text-sm">{analysis?.summary}</p>
+              <div className="grid grid-cols-2 gap-4 pt-4">
+                <div className="flex flex-col items-center justify-center text-center p-4 rounded-lg bg-background/50">
+                    <h3 className="text-3xl font-bold text-primary">{analysis?.struggleStat}</h3>
+                    <p className="text-xs text-muted-foreground">face similar challenges</p>
+                </div>
+                <div className="flex flex-col items-center justify-center relative">
+                    <ChartContainer
+                        config={chartConfig}
+                        className="mx-auto aspect-square h-full w-full"
+                    >
+                        <ResponsiveContainer>
+                            <RadarChart
+                                data={[{ subject: 'Success', A: analysis?.successRate ?? 0, fullMark: 100 }]}
+                                margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
+                            >
+                                <PolarGrid gridType="circle" />
+                                <PolarAngleAxis dataKey="subject" tick={false} />
+                                <Radar
+                                name="Success Rate"
+                                dataKey="A"
+                                stroke="hsl(var(--primary))"
+                                fill="hsl(var(--primary))"
+                                fillOpacity={0.6}
+                                />
+                            </RadarChart>
+                        </ResponsiveContainer>
+                    </ChartContainer>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <p className="text-3xl font-bold text-primary">{analysis?.successRate}%</p>
+                        <p className="text-xs text-muted-foreground">Success Rate</p>
+                    </div>
+                </div>
+              </div>
             </>
           )}
         </CardContent>

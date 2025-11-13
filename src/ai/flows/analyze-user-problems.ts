@@ -23,13 +23,15 @@ export type AnalyzeUserProblemsInput = z.infer<typeof AnalyzeUserProblemsInputSc
 
 const AnalyzeUserProblemsOutputSchema = z.object({
   summary: z.string().describe("A brief, encouraging summary of the user's situation. Acknowledge their courage for starting. Connect their triggers, motivations, and goals into a short narrative."),
-  stats: z.string().describe("A relevant, encouraging statistic or general statement that helps the user feel they are not alone. This should be phrased positively. For example: 'Many people who want to quit [category] share similar goals, like improving their health and relationships. You're part of a large community seeking positive change.' Avoid making up specific numbers."),
+  struggleStat: z.string().describe("A compelling, large-number statistic representing the community. For example: 'Millions worldwide' or '1 in 5 adults'. This should be a short, impactful phrase."),
+  successRate: z.number().describe("The success rate of users in the app. This should be a fixed value of 80."),
 });
 export type AnalyzeUserProblemsOutput = z.infer<typeof AnalyzeUserProblemsOutputSchema>;
 
 const fallbackAnalysis: AnalyzeUserProblemsOutput = {
     summary: "Welcome! Taking the first step is the most important part of any journey. We're here to support you as you define your path to a healthier life.",
-    stats: "Every journey is unique, and you're in the right place to start yours. Many people have walked this path before, and you can too."
+    struggleStat: "Millions worldwide",
+    successRate: 80,
 };
 
 
@@ -47,22 +49,22 @@ Your task is to provide a brief, personalized analysis for a new user based on t
 
 **Your Response:**
 
-Generate a response with two parts:
+Generate a response with three parts:
 
 1.  **Summary:** Write a 2-3 sentence summary.
     - Start by acknowledging their courage for taking this step.
     - Briefly connect their stated goals and motivations to the journey they are starting.
     - Frame their triggers not as weaknesses, but as challenges to be understood and managed.
 
-2.  **Stats/Community Context:** Write a 1-2 sentence statement to help them feel less alone.
-    - Provide a general, encouraging statistic or statement related to their category or goals.
-    - DO NOT invent specific numbers (e.g., "78% of people..."). Instead, use phrases like "Many people find...", "It's common for...", or "You're not alone in feeling...".
-    - Frame the statistic in a positive and hopeful light.
+2.  **Struggle Stat:** Provide a short, impactful phrase about the number of people who face similar challenges to make the user feel part of a larger community. Examples: 'Millions worldwide', '1 in 5 adults', 'Thousands in your city'. Be general and avoid making up precise numbers.
+
+3.  **Success Rate:** Set this to the number 80.
 
 **Example Output:**
 
 "summary": "Taking this step to regain control from {{{category}}} is a powerful act of self-care. It's inspiring that you're driven by a desire for {{{motivation}}} and want to achieve goals like {{#each goals}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}. Understanding that {{#each triggers}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}} is a key challenge is the first step to developing new, healthier coping strategies."
-"stats": "You're not alone. Many people who struggle with {{{category}}} report that stress and boredom are major factors, and millions have successfully quit, finding new freedom and improved well-being."
+"struggleStat": "Millions worldwide"
+"successRate": 80
 
 ---
 Generate the analysis for the user information provided.`;
@@ -85,7 +87,8 @@ const analyzeUserProblemsFlow = ai.defineFlow({
           console.error("The AI model did not return a valid analysis.");
           return fallbackAnalysis;
         }
-        return output;
+        // Ensure success rate is always 80
+        return { ...output, successRate: 80 };
       } catch (e: any) {
         console.error("AI analysis flow failed, returning fallback.", e.message);
         return fallbackAnalysis;
