@@ -30,22 +30,23 @@ export default function BottomNav() {
           <Link
             href="/dashboard"
             className={cn(
-              "flex flex-col items-center justify-center text-muted-foreground w-20 h-20 rounded-full bg-card border-4 border-background shadow-lg transition-all duration-300",
+              "flex flex-col items-center justify-center text-muted-foreground w-20 h-20 rounded-full bg-background/80 backdrop-blur-lg border-4 border-background shadow-lg transition-all duration-300",
               "hover:scale-110 hover:text-primary",
               pathname.startsWith("/dashboard") ? "text-primary scale-110" : ""
             )}
           >
             <div className={cn(
-              "flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 transition-transform duration-500 ease-bounce",
+              "flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 transition-transform duration-500 ease-bounce relative overflow-hidden",
                pathname.startsWith("/dashboard") ? "scale-110" : "scale-100"
             )}>
-              <Flame className="h-8 w-8" />
+              <div className="absolute inset-0 bg-primary/20 opacity-50 rounded-full animate-pulse"></div>
+              <Flame className="h-8 w-8 z-10" />
             </div>
           </Link>
         </div>
 
         {/* Arched Background */}
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-card border-t border-border/80 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-card/80 backdrop-blur-lg border-t border-border/80 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
           <div className="flex justify-between items-center h-full max-w-md mx-auto px-2">
             {/* Left side */}
             <div className="flex justify-around items-center w-2/5">
