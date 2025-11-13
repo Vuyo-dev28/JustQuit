@@ -29,7 +29,6 @@ export default function BottomNav() {
         const activeElement = activeItem ? itemsRef.current.get(activeItem.href) : null;
         
         if (activeElement) {
-            const navRect = navRef.current.getBoundingClientRect();
             const { offsetLeft, offsetWidth } = activeElement;
             setIndicatorStyle({
                 left: `${offsetLeft}px`,
