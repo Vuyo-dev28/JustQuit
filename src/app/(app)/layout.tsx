@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 
 import BottomNav from "@/components/shared/BottomNav";
 import { supabase } from "@/lib/supabase/client";
+import SplashScreen from "@/components/shared/SplashScreen";
 
 export default function AppLayout({
   children,
@@ -17,6 +18,7 @@ export default function AppLayout({
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
   const isFirstRender = useRef(true);
 
   useEffect(() => {
@@ -38,6 +40,9 @@ export default function AppLayout({
       }
 
       setIsLoading(false);
+      setTimeout(() => {
+        if(isMounted) setShowSplash(false);
+      }, 2000); // Show splash for 2 seconds
     };
 
     void init();
@@ -69,15 +74,20 @@ export default function AppLayout({
   }, [pathname]);
 
   if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <span className="text-muted-foreground">Loading your data...</span>
-      </div>
-    );
+    return <SplashScreen />;
   }
 
   return (
     <div className="relative flex h-screen flex-col">
+       <div
+        className={cn(
+          "fixed inset-0 z-[100] bg-background transition-opacity duration-500",
+          showSplash ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
+      >
+        <SplashScreen />
+      </div>
+
       <main className="flex-1 overflow-y-auto pb-28">{children}</main>
       <BottomNav />
 
