@@ -32,19 +32,8 @@ const fallbackAnalysis: AnalyzeUserProblemsOutput = {
     stats: "Every journey is unique, and you're in the right place to start yours. Many people have walked this path before, and you can too."
 };
 
-export async function analyzeUserProblems(input: AnalyzeUserProblemsInput): Promise<AnalyzeUserProblemsOutput> {
-    // Ensure at least one piece of data is present to avoid empty prompts
-    if (Object.values(input).every(val => !val || (Array.isArray(val) && val.length === 0))) {
-        return fallbackAnalysis;
-    }
-  return analyzeUserProblemsFlow(input);
-}
 
-const prompt = ai.definePrompt({
-  name: 'analyzeUserProblemsPrompt',
-  input: { schema: AnalyzeUserProblemsInputSchema },
-  output: { schema: AnalyzeUserProblemsOutputSchema },
-  prompt: `You are an empathetic and encouraging AI assistant for 'Triumph Over Vice', an app that helps people overcome addictions.
+const promptTemplate = `You are an empathetic and encouraging AI assistant for 'JustQuit', an app that helps people overcome addictions.
 
 Your task is to provide a brief, personalized analysis for a new user based on their signup information. Your tone should be supportive, non-judgmental, and empowering.
 
@@ -76,28 +65,39 @@ Generate a response with two parts:
 "stats": "You're not alone. Many people who struggle with {{{category}}} report that stress and boredom are major factors, and millions have successfully quit, finding new freedom and improved well-being."
 
 ---
-Generate the analysis for the user information provided.`,
-});
+Generate the analysis for the user information provided.`;
 
-const analyzeUserProblemsFlow = ai.defineFlow(
-  {
+const analyzeUserProblemsFlow = ai.defineFlow({
     name: 'analyzeUserProblemsFlow',
     inputSchema: AnalyzeUserProblemsInputSchema,
     outputSchema: AnalyzeUserProblemsOutputSchema,
-  },
-  async (input) => {
+}, async (input) => {
     try {
-        const { output } = await prompt(input);
+        const { output } = await ai.generate({
+          prompt: promptTemplate,
+          input,
+          output: {
+            schema: AnalyzeUserProblemsOutputSchema,
+          },
+        });
+
         if (!output) {
           console.error("The AI model did not return a valid analysis.");
           return fallbackAnalysis;
         }
         return output;
-    } catch (e: any) {
+      } catch (e: any) {
         console.error("AI analysis flow failed, returning fallback.", e.message);
-        // If the model is overloaded or fails for any reason, return a default analysis
-        // to avoid blocking the user signup flow.
+        return fallbackAnalysis;
+      }
+});
+
+
+export async function analyzeUserProblems(input: AnalyzeUserProblemsInput): Promise<AnalyzeUserProblemsOutput> {
+    // Ensure at least one piece of data is present to avoid empty prompts
+    if (Object.values(input).every(val => !val || (Array.isArray(val) && val.length === 0))) {
         return fallbackAnalysis;
     }
-  }
-);
+    // Directly call the async flow logic
+    return await analyzeUserProblemsFlow(input);
+}

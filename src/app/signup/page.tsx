@@ -6,14 +6,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SignatureCanvas from "react-signature-canvas";
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from "recharts";
-import {
   Activity,
   ArrowLeft,
   BedDouble,
@@ -40,12 +32,10 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -53,6 +43,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { failureReasons } from "@/lib/data";
 import { supabase } from "@/lib/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { analyzeUserProblems, AnalyzeUserProblemsInput, AnalyzeUserProblemsOutput } from "@/ai/flows/analyze-user-problems";
 
 
 const categories: Category[] = [
@@ -76,7 +67,7 @@ const categories: Category[] = [
   },
 ];
 
-const totalSteps = 12;
+const totalSteps = 13;
 
 const questions = [
     { id: 'welcome', title: "Let's Get Started", description: "Take the first step towards a healthier, happier you. Let's triumph over vice together." },
@@ -88,6 +79,7 @@ const questions = [
     { id: 'goals', title: 'Question #6', description: 'What are your primary goals?'},
     { id: 'triggers', title: 'Question #7', description: 'What are your relapse triggers?'},
     { id: 'motivation', title: 'Question #8', description: 'Why do you want to be free?'},
+    { id: 'analysis', title: 'A Quick Analysis', description: "Here's a little encouragement based on your answers." },
     { id: 'goal', title: 'Question #9', description: 'What is your initial goal?' },
     { id: 'pledge', title: 'Sign your commitment', description: 'Promise yourself that you will never do it again.' },
     { id: 'credentials', title: 'Create your account', description: 'Almost there! Secure your journey.' },
@@ -131,7 +123,7 @@ export default function SignupPage() {
   const currentQuestion = questions[step - 1];
 
   const getDynamicDescription = () => {
-    if (step === 11 && selectedCategory) { // Adjusted step for signature
+    if (step === 12 && selectedCategory) { 
       const categoryTextMap = {
         Porn: 'watch porn',
         Alcohol: 'drink alcohol',
@@ -356,9 +348,10 @@ export default function SignupPage() {
                 {step === 7 && <StepChooseGoals chosenGoals={chosenGoals} setChosenGoals={setChosenGoals} onNext={handleNext} />}
                 {step === 8 && <StepTriggers category={selectedCategory} triggers={triggers} setTriggers={setTriggers} onNext={handleNext} />}
                 {step === 9 && <StepMotivation motivation={motivation} setMotivation={setMotivation} onNext={handleNext} />}
-                {step === 10 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
-                {step === 11 && <StepSignature onNext={handleNext} />}
-                {step === 12 && <StepCredentials email={email} setEmail={setEmail} password={password} setPassword={setPassword} onComplete={handleCompleteSignup} isSubmitting={isSubmitting} />}
+                {step === 10 && <StepAiAnalysis input={signupData} onNext={handleNext} />}
+                {step === 11 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
+                {step === 12 && <StepSignature onNext={handleNext} />}
+                {step === 13 && <StepCredentials email={email} setEmail={setEmail} password={password} setPassword={setPassword} onComplete={handleCompleteSignup} isSubmitting={isSubmitting} />}
             </div>
 
              <div className="text-center text-sm text-muted-foreground">
@@ -711,6 +704,73 @@ function StepSignature({ onNext }: { onNext: () => void }) {
   );
 }
 
+function StepAiAnalysis({ input, onNext }: { input: AnalyzeUserProblemsInput; onNext: () => void }) {
+  const [analysis, setAnalysis] = useState<AnalyzeUserProblemsOutput | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+  const analysisPerformed = useRef(false);
+
+  useEffect(() => {
+    const getAnalysis = async () => {
+      // Prevent running analysis multiple times
+      if (analysisPerformed.current) return;
+      analysisPerformed.current = true;
+
+      setIsLoading(true);
+      try {
+        const result = await analyzeUserProblems(input);
+        setAnalysis(result);
+      } catch (error) {
+        console.error("AI analysis failed:", error);
+        toast({
+          variant: "destructive",
+          title: "Analysis Failed",
+          description: "Could not get AI-powered feedback. Using default messages.",
+        });
+        // Set a fallback analysis so the user isn't blocked
+        setAnalysis({
+            summary: "Taking this first step is a brave and powerful decision. You have a community here to support you on your journey to a healthier life.",
+            stats: "Many people share similar goals and face similar challenges. You are not alone, and every day is a new opportunity for success."
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    void getAnalysis();
+  }, [input, toast]);
+
+  return (
+    <div className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+      <Card className="w-full max-w-md bg-secondary/30">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Your Path Forward</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {isLoading ? (
+            <>
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-4/5" />
+              <Skeleton className="h-4 w-full mt-4" />
+              <Skeleton className="h-4 w-3/4" />
+            </>
+          ) : (
+            <>
+              <p className="text-foreground/90">{analysis?.summary}</p>
+              <p className="text-primary italic font-medium">{analysis?.stats}</p>
+            </>
+          )}
+        </CardContent>
+      </Card>
+      <Button onClick={onNext} size="lg" className="w-full max-w-xs rounded-full">
+        Continue
+      </Button>
+    </div>
+  );
+}
+
+
 function StepCredentials({
   email,
   setEmail,
@@ -767,11 +827,3 @@ function StepCredentials({
     </form>
   );
 }
-    
-
-    
-
-    
-
-    
-
