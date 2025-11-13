@@ -22,7 +22,6 @@ import {
   Wine,
   Zap,
 } from "lucide-react";
-import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer } from "recharts";
 import Autoplay from "embla-carousel-autoplay";
 
 import type { AddictionCategory, Category } from "@/lib/types";
@@ -41,13 +40,10 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Skeleton } from "@/components/ui/skeleton";
 import { failureReasons } from "@/lib/data";
 import { addictionConsequences } from "@/lib/consequences";
 import { supabase } from "@/lib/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { analyzeUserProblems, AnalyzeUserProblemsInput, AnalyzeUserProblemsOutput } from "@/ai/flows/analyze-user-problems";
-import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 
@@ -72,7 +68,7 @@ const categories: Category[] = [
   },
 ];
 
-const totalSteps = 14;
+const totalSteps = 13;
 
 const questions = [
     { id: 'welcome', title: "Let's Get Started", description: "Take the first step towards a healthier, happier you. Let's triumph over vice together." },
@@ -85,7 +81,6 @@ const questions = [
     { id: 'goals', title: 'What are your primary goals?', description: 'Select all that apply.'},
     { id: 'triggers', title: 'What are your relapse triggers?', description: 'Identifying them is the first step to managing them.'},
     { id: 'motivation', title: 'Why do you want to be free?', description: 'Connect with your deepest reason.'},
-    { id: 'analysis', title: 'A Quick Analysis', description: "Here's a little encouragement based on your answers." },
     { id: 'goal', title: 'What is your initial goal?', description: 'Set a target to aim for.' },
     { id: 'pledge', title: 'Sign your commitment', description: 'Promise yourself that you will never do it again.' },
     { id: 'credentials', title: 'Create your account', description: 'Almost there! Secure your journey.' },
@@ -129,7 +124,7 @@ export default function SignupPage() {
   const currentQuestion = questions[step - 1];
 
   const getDynamicDescription = () => {
-    if (step === 13 && selectedCategory) { 
+    if (step === 12 && selectedCategory) { 
       const categoryTextMap = {
         Porn: 'watch porn',
         Alcohol: 'drink alcohol',
@@ -140,15 +135,6 @@ export default function SignupPage() {
     return currentQuestion.description;
   }
   
-  const signupData: AnalyzeUserProblemsInput = {
-      category: selectedCategory ?? undefined,
-      age,
-      gender,
-      triggers,
-      motivation,
-      goals: chosenGoals
-  };
-
   useEffect(() => {
     let isMounted = true;
 
@@ -355,10 +341,9 @@ export default function SignupPage() {
                 {step === 8 && <StepChooseGoals chosenGoals={chosenGoals} setChosenGoals={setChosenGoals} onNext={handleNext} />}
                 {step === 9 && <StepTriggers category={selectedCategory} triggers={triggers} setTriggers={setTriggers} onNext={handleNext} />}
                 {step === 10 && <StepMotivation motivation={motivation} setMotivation={setMotivation} onNext={handleNext} />}
-                {step === 11 && <StepAiAnalysis input={signupData} onNext={handleNext} />}
-                {step === 12 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
-                {step === 13 && <StepSignature onNext={handleNext} />}
-                {step === 14 && <StepCredentials email={email} setEmail={setEmail} password={password} setPassword={setPassword} onComplete={handleCompleteSignup} isSubmitting={isSubmitting} />}
+                {step === 11 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
+                {step === 12 && <StepSignature onNext={handleNext} />}
+                {step === 13 && <StepCredentials email={email} setEmail={setEmail} password={password} setPassword={setPassword} onComplete={handleCompleteSignup} isSubmitting={isSubmitting} />}
             </div>
 
              <div className="text-center text-sm text-muted-foreground">
@@ -752,139 +737,6 @@ function StepSignature({ onNext }: { onNext: () => void }) {
   );
 }
 
-const chartConfig = {
-  success: {
-    label: "Success Rate",
-    color: "hsl(var(--primary))",
-  },
-} satisfies ChartConfig;
-
-
-function StepAiAnalysis({ input, onNext }: { input: AnalyzeUserProblemsInput; onNext: () => void }) {
-  const [analysis, setAnalysis] = useState<AnalyzeUserProblemsOutput | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
-  const analysisPerformed = useRef(false);
-
-  useEffect(() => {
-    const getAnalysis = async () => {
-      if (analysisPerformed.current) return;
-      analysisPerformed.current = true;
-
-      setIsLoading(true);
-      try {
-        const result = await analyzeUserProblems(input);
-        setAnalysis(result);
-      } catch (error) {
-        console.error("AI analysis failed:", error);
-        toast({
-          variant: "destructive",
-          title: "Analysis Failed",
-          description: "Could not get AI-powered feedback. Using default messages.",
-        });
-        setAnalysis({
-            summary: "Taking this first step is a brave and powerful decision. You have a community here to support you on your journey to a healthier life.",
-            struggleStat: "Millions",
-            successRate: 80,
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    void getAnalysis();
-  }, [input, toast]);
-
-  const renderLoading = () => (
-    <div className="space-y-6">
-        <Card className="w-full max-w-md bg-secondary/30">
-            <CardHeader>
-                <Skeleton className="h-5 w-3/4" />
-            </CardHeader>
-            <CardContent className="space-y-3">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-4/5" />
-            </CardContent>
-        </Card>
-        <div className="grid grid-cols-2 gap-4">
-            <Card className="bg-secondary/30">
-                <CardContent className="p-4 flex flex-col items-center justify-center text-center h-32">
-                    <Skeleton className="h-8 w-1/2 mb-2" />
-                    <Skeleton className="h-4 w-3/4" />
-                </CardContent>
-            </Card>
-             <Card className="bg-secondary/30">
-                <CardContent className="p-4 flex items-center justify-center h-32">
-                    <Skeleton className="h-24 w-24 rounded-full" />
-                </CardContent>
-            </Card>
-        </div>
-    </div>
-  )
-
-  const renderContent = () => (
-    <div className="space-y-4">
-        <Card className="w-full max-w-md bg-card border-border/80 shadow-sm">
-            <CardHeader>
-                <CardTitle className="text-base font-semibold">Your Path Forward</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <p className="text-sm text-foreground/80">{analysis?.summary}</p>
-            </CardContent>
-        </Card>
-
-        <div className="grid grid-cols-2 gap-4">
-            <Card className="bg-card border-border/80 shadow-sm">
-                <CardContent className="p-4 flex flex-col items-center justify-center text-center h-full">
-                    <h3 className="text-3xl font-bold text-primary">{analysis?.struggleStat}</h3>
-                    <p className="text-xs text-muted-foreground mt-1">face similar challenges</p>
-                </CardContent>
-            </Card>
-            <Card className="bg-card border-border/80 shadow-sm">
-                <CardContent className="p-4 flex flex-col items-center justify-center h-full relative">
-                    <ChartContainer
-                        config={chartConfig}
-                        className="mx-auto aspect-square h-full w-full max-h-[100px]"
-                    >
-                        <ResponsiveContainer>
-                            <RadarChart
-                                data={[{ subject: 'Success', A: analysis?.successRate ?? 0, fullMark: 100 }]}
-                                margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-                                innerRadius="35%"
-                                outerRadius="100%"
-                            >
-                                <PolarGrid gridType="circle" stroke="hsl(var(--border) / 0.5)" />
-                                <Radar
-                                    name="Success Rate"
-                                    dataKey="A"
-                                    stroke="hsl(var(--primary))"
-                                    fill="hsl(var(--primary))"
-                                    fillOpacity={0.6}
-                                />
-                            </RadarChart>
-                        </ResponsiveContainer>
-                    </ChartContainer>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                        <p className="text-2xl font-bold text-primary">{analysis?.successRate}%</p>
-                        <p className="text-xs text-muted-foreground">Success Rate</p>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
-    </div>
-)
-
-  return (
-    <div className="space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 flex flex-col items-center">
-      {isLoading ? renderLoading() : renderContent()}
-      <Button onClick={onNext} size="lg" className="w-full max-w-xs rounded-full">
-        Continue
-      </Button>
-    </div>
-  );
-}
-
-
 function StepCredentials({
   email,
   setEmail,
@@ -941,7 +793,3 @@ function StepCredentials({
     </form>
   );
 }
-
-    
-
-    
