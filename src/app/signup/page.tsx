@@ -23,6 +23,7 @@ import {
   Zap,
 } from "lucide-react";
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer } from "recharts";
+import Autoplay from "embla-carousel-autoplay";
 
 import type { AddictionCategory, Category } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -406,10 +407,18 @@ function Step2({ onSelect }: { onSelect: (category: AddictionCategory) => void }
 
 function StepConsequences({ category, onNext }: { category: AddictionCategory | null; onNext: () => void }) {
     const consequences = category ? addictionConsequences[category] : [];
+    const plugin = React.useRef(
+        Autoplay({ delay: 2000, stopOnInteraction: true })
+    );
 
     return (
         <div className="space-y-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500 flex flex-col items-center">
-            <Carousel className="w-full max-w-xs">
+            <Carousel 
+                plugins={[plugin.current]}
+                className="w-full max-w-xs"
+                onMouseEnter={plugin.current.stop}
+                onMouseLeave={plugin.current.reset}
+            >
                 <CarouselContent>
                     {consequences.map((item, index) => (
                         <CarouselItem key={index}>
