@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import BottomNav from "@/components/shared/BottomNav";
 import { supabase } from "@/lib/supabase/client";
 import SplashScreen from "@/components/shared/SplashScreen";
+import { cn } from "@/lib/utils";
 
 export default function AppLayout({
   children,
