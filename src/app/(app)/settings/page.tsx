@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { User, Camera } from "lucide-react";
+import { User, Camera, Moon, Sun } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +31,7 @@ import {
 import { supabase } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { Switch } from "@/components/ui/switch";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -47,6 +48,25 @@ export default function SettingsPage() {
   const [pledge, setPledge] = useState("");
   const [profilePic, setProfilePic] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const isDark = document.documentElement.classList.contains('dark');
+    setIsDarkMode(isDark);
+  }, []);
+
+
+  const toggleTheme = (checked: boolean) => {
+    setIsDarkMode(checked);
+    if (checked) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  };
+
 
   useEffect(() => {
     let isMounted = true;
@@ -317,6 +337,29 @@ export default function SettingsPage() {
         <h1 className="text-2xl font-bold font-headline">Settings</h1>
         <p className="text-muted-foreground">Manage your account and goals.</p>
       </header>
+
+      <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-100 fill-mode-both">
+        <CardHeader>
+          <CardTitle>Appearance</CardTitle>
+          <CardDescription>
+            Switch between light and dark mode.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="theme-switch" className="flex items-center gap-2">
+              {isDarkMode ? <Moon/> : <Sun />}
+              <span>{isDarkMode ? 'Dark Mode' : 'Light Mode'}</span>
+            </Label>
+            <Switch
+              id="theme-switch"
+              checked={isDarkMode}
+              onCheckedChange={toggleTheme}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
 
       <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500 delay-100 fill-mode-both">
         <CardHeader>
