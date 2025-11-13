@@ -66,6 +66,9 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-image: linear-gradient(to right, #000000, #1a237e);
+    background-image: url('/splash.gif');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
   }
 }
