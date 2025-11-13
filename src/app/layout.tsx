@@ -6,6 +6,13 @@ import Script from "next/script";
 export const metadata: Metadata = {
   title: "Just Quit",
   description: "Your companion in overcoming addiction.",
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: 'cover',
+  },
 };
 
 export default function RootLayout({
@@ -22,8 +29,6 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap"
           rel="stylesheet"
         />
-      </head>
-      <body className="font-body antialiased bg-background">
         <Script id="theme-switcher" strategy="beforeInteractive">
           {`
             if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -33,6 +38,8 @@ export default function RootLayout({
             }
           `}
         </Script>
+      </head>
+      <body className="font-body antialiased bg-background">
         {children}
         <Toaster />
       </body>
