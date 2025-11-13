@@ -76,7 +76,7 @@ const categories: Category[] = [
   },
 ];
 
-const totalSteps = 11;
+const totalSteps = 12;
 
 const questions = [
     { id: 'welcome', title: "Let's Get Started", description: "Take the first step towards a healthier, happier you. Let's triumph over vice together." },
@@ -131,13 +131,13 @@ export default function SignupPage() {
   const currentQuestion = questions[step - 1];
 
   const getDynamicDescription = () => {
-    if (step === 10 && selectedCategory) { // Adjusted step for signature
+    if (step === 11 && selectedCategory) { // Adjusted step for signature
       const categoryTextMap = {
         Porn: 'watch porn',
         Alcohol: 'drink alcohol',
         Smoking: 'smoke'
       }
-      return `Finally, promise yourself that you will never ${categoryTextMap[selectedCategory]} again.`
+      return `Promise yourself that you will never ${categoryTextMap[selectedCategory]} again.`
     }
     return currentQuestion.description;
   }
@@ -357,7 +357,8 @@ export default function SignupPage() {
                 {step === 8 && <StepTriggers category={selectedCategory} triggers={triggers} setTriggers={setTriggers} onNext={handleNext} />}
                 {step === 9 && <StepMotivation motivation={motivation} setMotivation={setMotivation} onNext={handleNext} />}
                 {step === 10 && <StepGoal goal={goal} setGoal={setGoal} onNext={handleNext} />}
-                {step === 11 && <StepSignature onNext={handleCompleteSignup} />}
+                {step === 11 && <StepSignature onNext={handleNext} />}
+                {step === 12 && <StepCredentials email={email} setEmail={setEmail} password={password} setPassword={setPassword} onComplete={handleCompleteSignup} isSubmitting={isSubmitting} />}
             </div>
 
              <div className="text-center text-sm text-muted-foreground">
@@ -675,22 +676,6 @@ function StepGoal({ goal, setGoal, onNext }: { goal: number; setGoal: (g: number
     )
 }
 
-const chartData = [
-  { trigger: "Stress", prevalence: 85 },
-  { trigger: "Boredom", prevalence: 70 },
-  { trigger: "Social", prevalence: 60 },
-  { trigger: "Habit", prevalence: 55 },
-  { trigger: "Loneliness", prevalence: 45 },
-];
-
-const chartConfig = {
-  prevalence: {
-    label: "Prevalence",
-    color: "hsl(var(--primary))",
-  },
-};
-
-
 function StepSignature({ onNext }: { onNext: () => void }) {
   const sigCanvas = useRef<SignatureCanvas | null>(null);
 
@@ -720,7 +705,64 @@ function StepSignature({ onNext }: { onNext: () => void }) {
       </div>
 
       <Button type="submit" size="lg" className="w-full max-w-xs rounded-full !mt-8">
-        Finish and Create Account
+        Continue
+      </Button>
+    </form>
+  );
+}
+
+function StepCredentials({
+  email,
+  setEmail,
+  password,
+  setPassword,
+  onComplete,
+  isSubmitting,
+}: {
+  email: string;
+  setEmail: (e: string) => void;
+  password: string;
+  setPassword: (p: string) => void;
+  onComplete: () => void;
+  isSubmitting: boolean;
+}) {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onComplete();
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in-0 duration-500 flex flex-col items-center">
+      <div className="w-full max-w-xs space-y-4">
+        <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+                id="email"
+                type="email"
+                placeholder="m@example.com"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                className="h-12 bg-secondary/50 rounded-full border-border focus:border-primary"
+            />
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+                id="password"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className="h-12 bg-secondary/50 rounded-full border-border focus:border-primary"
+                placeholder="6+ characters"
+            />
+        </div>
+      </div>
+      <Button type="submit" size="lg" className="w-full max-w-xs rounded-full" disabled={isSubmitting}>
+        {isSubmitting ? "Creating Account..." : "Finish and Create Account"}
       </Button>
     </form>
   );
@@ -732,3 +774,4 @@ function StepSignature({ onNext }: { onNext: () => void }) {
     
 
     
+
