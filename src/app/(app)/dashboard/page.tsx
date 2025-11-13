@@ -57,7 +57,9 @@ import {
   isWithinInterval,
   startOfDay,
   subDays,
-  subWeeks,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
 } from "date-fns";
 
 
@@ -89,26 +91,21 @@ const buildWeeklyChartData = (logs: DailyLog[]) => {
 };
 
 const buildMonthlyChartData = (logs: DailyLog[]) => {
-  const today = startOfDay(new Date());
-  const points: Array<{ week: string; days: number }> = [];
+  const today = new Date();
+  const points: Array<{ month: string; days: number }> = [];
 
-  for (let weekIndex = 3; weekIndex >= 0; weekIndex -= 1) {
-    const weekStart = startOfDay(subWeeks(today, weekIndex));
-    const weekEnd = addDays(weekStart, 6);
+  for (let i = 5; i >= 0; i--) {
+    const targetMonthDate = subMonths(today, i);
+    const monthStart = startOfMonth(targetMonthDate);
+    const monthEnd = endOfMonth(targetMonthDate);
 
     const successes = logs.filter((log) => {
-      const logDate = startOfDay(new Date(log.logged_date));
-      return (
-        log.success &&
-        isWithinInterval(logDate, {
-          start: weekStart,
-          end: weekEnd,
-        })
-      );
+      const logDate = new Date(log.logged_date);
+      return log.success && isWithinInterval(logDate, { start: monthStart, end: monthEnd });
     }).length;
 
     points.push({
-      week: `Week ${4 - weekIndex}`,
+      month: format(monthStart, "MMM"),
       days: successes,
     });
   }
@@ -116,11 +113,12 @@ const buildMonthlyChartData = (logs: DailyLog[]) => {
   return points;
 };
 
+
 export default function DashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [userId, setUserId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(isLoading);
   const [isLogging, setIsLogging] = useState(false);
   const [lastLogDate, setLastLogDate] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -540,7 +538,7 @@ export default function DashboardPage() {
                     <ChartContainer config={chartConfig} className="h-48 w-full mt-4">
                         <BarChart accessibilityLayer data={monthlyChartData}>
                             <defs>
-                                <linearGradient id="fillDays" x1="0" y1="0" x2="0" y2="1">
+                                <linearGradient id="fillDaysMonthly" x1="0" y1="0" x2="0" y2="1">
                                 <stop
                                     offset="5%"
                                     stopColor="var(--color-days)"
@@ -555,7 +553,7 @@ export default function DashboardPage() {
                             </defs>
                             <CartesianGrid vertical={false} />
                             <XAxis
-                                dataKey="week"
+                                dataKey="month"
                                 tickLine={false}
                                 tickMargin={10}
                                 axisLine={false}
@@ -565,7 +563,7 @@ export default function DashboardPage() {
                                 cursor={false}
                                 content={<ChartTooltipContent indicator="dot" />}
                             />
-                            <Bar dataKey="days" fill="url(#fillDays)" radius={8} />
+                            <Bar dataKey="days" fill="url(#fillDaysMonthly)" radius={8} />
                         </BarChart>
                     </ChartContainer>
                 </TabsContent>
